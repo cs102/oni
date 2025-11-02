@@ -1,0 +1,76 @@
+$r: 3em;
+$x: .35;
+$y: .7;
+
+@property --r {
+	syntax: '<length>';
+	initial-value: 6px;
+	inherits: true
+}
+
+@property --x {
+	syntax: '<length>';
+	initial-value: 0px;
+	inherits: true
+}
+
+@property --y {
+	syntax: '<length>';
+	initial-value: 0px;
+	inherits: true
+}
+
+body {
+	overflow-x: hidden;
+	margin: 0;
+	background: currentcolor;
+	color: #121212;
+	font-family: "Cooper Black"
+	src: url("/Library/Fonts/COOPBL 2.TTF");
+}
+
+.wrap {
+	--hov: 0;
+	--r: calc(6px + var(--hov)*#{$r});
+	display: grid;
+	place-items: center;
+	height: 100vh;
+	font: 900 clamp(.875em, 6.25vw, 8em)/ 1.125 bowlby one sc, sans-serif;
+	transition-property: --x, --r, --y;
+	transition-duration: calc(.35s + var(--hov)*.15s), calc(.65s + .35s*var(--hov));
+	transition-timing-function: 
+		cubic-bezier($x, 1, 1 - $x, 1), 
+		cubic-bezier(1 - $x, calc((var(--hov) - 1)*#{$y}), $x, calc(1 + #{$y}*var(--hov)));
+		
+	&::before {
+		grid-area: 1/ 1;
+		z-index: 1;
+		padding: var(--r);
+		border-radius: 50%;
+		translate: var(--x) var(--y);
+		background: linear-gradient(45deg, var(--c));
+		transition: opacity .2s;
+		pointer-events: none;
+		content: ''
+	}
+	
+	&:not(:hover)::before { opacity: 0 }
+	&:has(p:hover) { --hov: 1 }
+}
+
+p {
+	grid-area: 1/ 1;
+	max-width: 4*$r;
+	text-align: center;
+	text-transform: uppercase;
+	
+	&:nth-child(1) {
+		background: linear-gradient(45deg, var(--c)) text;
+		color: transparent
+	}
+	
+	&:nth-child(2) {
+		z-index: 2;
+		clip-path: circle(var(--r) at calc(50% + var(--x)) calc(50% + var(--y)))
+	}
+}
