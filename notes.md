@@ -1,3 +1,10 @@
+nltk word relations word clusters
+word clusters
+Sigmoid Function
+{\displaystyle f(x)={\frac {1}{1+e^{-x}}}}
+
+
+
 Fucking magic!
 In vim this will select add "" around all words selected
 :%s/\w\+/"&"/gc

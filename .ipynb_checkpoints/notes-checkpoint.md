@@ -1,6 +1,28 @@
+nltk word relations word clusters
+word clusters
+Sigmoid Function
+{\displaystyle f(x)={\frac {1}{1+e^{-x}}}}
+
+
+
 Fucking magic!
 In vim this will select add "" around all words selected
 :%s/\w\+/"&"/gc
+
+Python Environment
+cd to project
+First time  -> python -m venv projectName
+source projectName/bin/activate
+https://www.w3schools.com/python/python_virtualenv.asp
+
+python3 -m venv .venv
+.. venv/bin/activate
+
+# NLTK View all available corpus
+import os
+import nltk
+print(os.listdir(nltk.data.find("corpora")))
+
 
 ##
 List of Greek and Latin roots
