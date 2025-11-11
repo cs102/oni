@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "*.conf": "c",
-        "*.cpp": "cpp",
-        "vector": "cpp"
-    }
-}
