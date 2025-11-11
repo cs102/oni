@@ -3,7 +3,9 @@ word clusters
 Sigmoid Function
 {\displaystyle f(x)={\frac {1}{1+e^{-x}}}}
 
-
+git
+https://git-scm.com/cheat-sheet
+https://www.nobledesktop.com/learn/git/git-branches
 
 Fucking magic!
 In vim this will select add "" around all words selected
