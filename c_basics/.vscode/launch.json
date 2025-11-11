@@ -1,0 +1,30 @@
+{
+    "workbench.colorTheme": "Dracula Soft",
+    "workbench.startupEditor": "none",
+    "editor.fontSize": 18,
+    "html.format.templating": true,
+    "diffEditor.ignoreTrimWhitespace": false,
+    "python.terminal.executeInFileDir": true,
+    "editor.renderWhitespace": "none",
+    "editor.wordWrap": "on",
+    "files.associations": {
+        "*.conf": "c",
+        "*.cpp": "cpp"
+    },
+    "git.openRepositoryInParentFolders": "never",
+    "extensions.ignoreRecommendations": true,
+    "editor.minimap.enabled": false,
+    "update.showReleaseNotes": false,
+    "debug.onTaskErrors": "debugAnyway",
+    "files.autoSave": "afterDelay",
+    "C_Cpp.default.compilerPath": "usr/local/Cellar/g++/14.1.0_1",
+    "C_Cpp.default.includePath": [
+        "usr/local/Cellar//14.1.0_1"
+    ],
+    "C_Cpp.default.compileCommands": "${de",
+    "C_Cpp.default.cppStandard": "c++98",
+    "C_Cpp.default.cStandard": "c89",
+    "C_Cpp.default.customConfigurationVariables": {
+        
+    }
+}
