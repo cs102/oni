@@ -3,7 +3,8 @@ word clusters
 Sigmoid Function
 {\displaystyle f(x)={\frac {1}{1+e^{-x}}}}
 
-
+Algorithmic wage discrimination
+Keynote Speaker - Cory Doctorow
 
 Fucking magic!
 In vim this will select add "" around all words selected

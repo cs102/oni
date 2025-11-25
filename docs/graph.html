@@ -1,0 +1,324 @@
+import React from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+
+const EducationalMetricsCharts = () => {
+  // Word families data by grade level
+  const wordFamiliesData = [
+    { name: 'Pre-K to K', value: 12, color: '#FFB3BA' },
+    { name: '1st-2nd', value: 26, color: '#FFDFBA' },
+    { name: '3rd-4th', value: 13, color: '#FFFFBA' },
+    { name: '5th-6th', value: 12, color: '#BAFFC9' },
+    { name: '7th-8th', value: 9, color: '#BAE1FF' },
+    { name: '9th-10th', value: 8, color: '#D4BAFF' },
+    { name: '11th-12th', value: 10, color: '#FFB3E6' }
+  ];
+
+  // Double consonant words data
+  const doubleConsonantData = [
+    { name: 'Pre-K to K', value: 25, color: '#FFB3BA' },
+    { name: '1st Grade', value: 45, color: '#FFDFBA' },
+    { name: '2nd Grade', value: 55, color: '#FFFFBA' },
+    { name: '3rd-4th', value: 60, color: '#BAFFC9' },
+    { name: '5th-6th', value: 65, color: '#BAE1FF' },
+    { name: '7th-8th', value: 70, color: '#D4BAFF' },
+    { name: '9th-10th', value: 75, color: '#FFB3E6' },
+    { name: '11th-12th', value: 70, color: '#E0BBE4' }
+  ];
+
+  // State literacy data - Adult literacy rates
+  const adultLiteracyData = [
+    { state: 'New Hampshire', rate: 94.2, type: 'High-performing', color: '#BAFFC9' },
+    { state: 'Minnesota', rate: 94.0, type: 'High-performing', color: '#BAFFC9' },
+    { state: 'North Dakota', rate: 93.7, type: 'High-performing', color: '#BAFFC9' },
+    { state: 'Vermont', rate: 93.4, type: 'High-performing', color: '#BAFFC9' },
+    { state: 'Massachusetts', rate: 92.8, type: 'High-performing', color: '#BAFFC9' },
+    { state: 'US Average', rate: 79.0, type: 'Average', color: '#FFE5B3' },
+    { state: 'New Jersey', rate: 83.1, type: 'Low-performing', color: '#FFB3BA' },
+    { state: 'Texas', rate: 81.0, type: 'Low-performing', color: '#FFB3BA' },
+    { state: 'Florida', rate: 80.3, type: 'Low-performing', color: '#FFB3BA' },
+    { state: 'New York', rate: 77.9, type: 'Low-performing', color: '#FFB3BA' },
+    { state: 'California', rate: 76.9, type: 'Low-performing', color: '#FFB3BA' }
+  ];
+
+  // 4th Grade Reading Proficiency (NAEP 2024) - % at or above proficient
+  const readingProficiencyData = [
+    { state: 'Massachusetts', rate: 48, type: 'High-performing', color: '#BAE1FF' },
+    { state: 'New Hampshire', rate: 42, type: 'High-performing', color: '#BAE1FF' },
+    { state: 'Vermont', rate: 40, type: 'High-performing', color: '#BAE1FF' },
+    { state: 'Connecticut', rate: 39, type: 'High-performing', color: '#BAE1FF' },
+    { state: 'New Jersey', rate: 38, type: 'High-performing', color: '#BAE1FF' },
+    { state: 'National Avg', rate: 30, type: 'Average', color: '#FFE5B3' },
+    { state: 'Mississippi', rate: 23, type: 'Low-performing', color: '#D4BAFF' },
+    { state: 'Louisiana', rate: 22, type: 'Improving', color: '#D4BAFF' },
+    { state: 'West Virginia', rate: 21, type: 'Low-performing', color: '#FFB3E6' },
+    { state: 'Alaska', rate: 21, type: 'Low-performing', color: '#FFB3E6' },
+    { state: 'New Mexico', rate: 20, type: 'Low-performing', color: '#FFB3E6' }
+  ];
+
+  const renderCustomLabel = (entry) => {
+    return `${entry.name} (${entry.value})`;
+  };
+
+  return (
+    <div style={{ 
+      width: '100%', 
+      padding: '20px', 
+      backgroundColor: '#FEFEFE',
+      fontFamily: 'Arial, sans-serif'
+    }}>
+      <h1 style={{ 
+        textAlign: 'center', 
+        color: '#555', 
+        marginBottom: '20px',
+        fontSize: '28px'
+      }}>
+        US Educational Vocabulary & Literacy Achievement
+      </h1>
+      <p style={{
+        textAlign: 'center',
+        color: '#666',
+        marginBottom: '40px',
+        fontSize: '16px',
+        maxWidth: '900px',
+        margin: '0 auto 40px'
+      }}>
+        Analysis of word family instruction progression and state-level literacy performance across socioeconomic contexts
+      </p>
+      
+      {/* Word Families Chart */}
+      <div style={{ marginBottom: '60px' }}>
+        <h2 style={{ 
+          textAlign: 'center', 
+          color: '#555', 
+          marginBottom: '10px',
+          fontSize: '22px'
+        }}>
+          Word Families by Grade Level
+        </h2>
+        <p style={{ 
+          textAlign: 'center', 
+          color: '#777', 
+          fontSize: '14px', 
+          marginBottom: '20px' 
+        }}>
+          Number of word family types introduced at each educational level
+        </p>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={wordFamiliesData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fill: '#555' }}
+              angle={-45}
+              textAnchor="end"
+              height={80}
+            />
+            <YAxis tick={{ fill: '#555' }} label={{ value: 'Count', angle: -90, position: 'insideLeft' }} />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#FFF', 
+                border: '1px solid #DDD',
+                borderRadius: '8px',
+                padding: '10px'
+              }}
+            />
+            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+              {wordFamiliesData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Double Consonant Words Chart */}
+      <div style={{ marginBottom: '60px' }}>
+        <h2 style={{ 
+          textAlign: 'center', 
+          color: '#555', 
+          marginBottom: '10px',
+          fontSize: '22px'
+        }}>
+          Double Consonant Words by Grade Level
+        </h2>
+        <p style={{ 
+          textAlign: 'center', 
+          color: '#777', 
+          fontSize: '14px', 
+          marginBottom: '20px' 
+        }}>
+          Approximate count of unique double consonant words taught at each level
+        </p>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={doubleConsonantData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fill: '#555' }}
+              angle={-45}
+              textAnchor="end"
+              height={80}
+            />
+            <YAxis tick={{ fill: '#555' }} label={{ value: 'Count', angle: -90, position: 'insideLeft' }} />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#FFF', 
+                border: '1px solid #DDD',
+                borderRadius: '8px',
+                padding: '10px'
+              }}
+            />
+            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+              {doubleConsonantData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Adult Literacy Rates by State */}
+      <div style={{ marginBottom: '60px' }}>
+        <h2 style={{ 
+          textAlign: 'center', 
+          color: '#555', 
+          marginBottom: '10px',
+          fontSize: '22px'
+        }}>
+          Adult Literacy Rates by State (2024)
+        </h2>
+        <p style={{ 
+          textAlign: 'center', 
+          color: '#777', 
+          fontSize: '14px', 
+          marginBottom: '10px' 
+        }}>
+          Percentage of adults with basic prose literacy skills
+        </p>
+        <p style={{ 
+          textAlign: 'center', 
+          color: '#999', 
+          fontSize: '12px', 
+          marginBottom: '20px',
+          fontStyle: 'italic'
+        }}>
+          High-performing states (green) vs. low-performing states (red/pink). Socioeconomic factors strongly correlate with literacy outcomes.
+        </p>
+        <ResponsiveContainer width="100%" height={500}>
+          <BarChart data={adultLiteracyData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
+            <XAxis 
+              dataKey="state" 
+              tick={{ fill: '#555', fontSize: 12 }}
+              angle={-45}
+              textAnchor="end"
+              height={100}
+            />
+            <YAxis 
+              tick={{ fill: '#555' }} 
+              label={{ value: 'Literacy Rate (%)', angle: -90, position: 'insideLeft' }}
+              domain={[70, 100]}
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#FFF', 
+                border: '1px solid #DDD',
+                borderRadius: '8px',
+                padding: '10px'
+              }}
+              formatter={(value) => `${value}%`}
+            />
+            <Bar dataKey="rate" radius={[8, 8, 0, 0]}>
+              {adultLiteracyData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* 4th Grade Reading Proficiency */}
+      <div style={{ marginBottom: '40px' }}>
+        <h2 style={{ 
+          textAlign: 'center', 
+          color: '#555', 
+          marginBottom: '10px',
+          fontSize: '22px'
+        }}>
+          4th Grade Reading Proficiency by State (NAEP 2024)
+        </h2>
+        <p style={{ 
+          textAlign: 'center', 
+          color: '#777', 
+          fontSize: '14px', 
+          marginBottom: '10px' 
+        }}>
+          Percentage of students at or above NAEP Proficient level
+        </p>
+        <p style={{ 
+          textAlign: 'center', 
+          color: '#999', 
+          fontSize: '12px', 
+          marginBottom: '20px',
+          fontStyle: 'italic'
+        }}>
+          Wealthy northeastern states (blue) consistently outperform poorer southern and western states (purple/pink). Louisiana shows improvement despite poverty.
+        </p>
+        <ResponsiveContainer width="100%" height={500}>
+          <BarChart data={readingProficiencyData} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#E0E0E0" />
+            <XAxis 
+              dataKey="state" 
+              tick={{ fill: '#555', fontSize: 12 }}
+              angle={-45}
+              textAnchor="end"
+              height={100}
+            />
+            <YAxis 
+              tick={{ fill: '#555' }} 
+              label={{ value: 'Proficiency Rate (%)', angle: -90, position: 'insideLeft' }}
+              domain={[0, 50]}
+            />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: '#FFF', 
+                border: '1px solid #DDD',
+                borderRadius: '8px',
+                padding: '10px'
+              }}
+              formatter={(value) => `${value}%`}
+            />
+            <Bar dataKey="rate" radius={[8, 8, 0, 0]}>
+              {readingProficiencyData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Key Findings Summary */}
+      <div style={{
+        backgroundColor: '#F9F9F9',
+        padding: '30px',
+        borderRadius: '12px',
+        marginTop: '40px',
+        border: '1px solid #E0E0E0'
+      }}>
+        <h3 style={{ color: '#555', marginBottom: '15px', fontSize: '20px' }}>
+          Key Findings on Socioeconomic Disparities
+        </h3>
+        <ul style={{ color: '#666', lineHeight: '1.8', fontSize: '14px' }}>
+          <li><strong>Wealthy vs. Poor States:</strong> Massachusetts (wealthy, 48% proficient) vastly outperforms New Mexico (poor, 20% proficient) - a 28 percentage point gap</li>
+          <li><strong>Adult Literacy Gap:</strong> New Hampshire adults (94.2% literate) vs. California adults (76.9% literate) - 17.3 percentage point difference</li>
+          <li><strong>Poverty Connection:</strong> 43% of adults with lowest literacy skills live in poverty; low literacy costs US economy $2.2 trillion annually</li>
+          <li><strong>Achievement Gap Widening:</strong> Gap between highest and lowest performing students is about 100 points on 500-point scale</li>
+          <li><strong>Positive Outliers:</strong> Mississippi and Louisiana (poor states) are improving through science-based reading instruction reforms</li>
+          <li><strong>Regional Patterns:</strong> Northeastern states (wealthier) consistently outperform southern and southwestern states (poorer)</li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default EducationalMetricsCharts;

@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Word Families Game</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;--glass: rgba(255,255,255,0.04)}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial; background:linear-gradient(180deg,#071023, #07142a 60%); color:#e6eef6}
+    .wrap{max-width:980px;margin:28px auto;padding:22px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;box-shadow:0 6px 24px rgba(2,6,23,0.6)}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{font-size:20px;margin:0}
+    p.lead{margin:2px 0 0;color:var(--muted);font-size:13px}
+    .board{display:grid;grid-template-columns:1fr 320px;gap:18px}
+    .card{background:var(--card);padding:14px;border-radius:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02)}
+    .family-box{display:flex;align-items:center;gap:12px}
+    .family{font-weight:700;font-size:44px;padding:8px 14px;border-radius:8px;background:var(--glass);color:var(--accent)}
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    button{background:#06202a;border:1px solid rgba(255,255,255,0.03);color:var(--accent);padding:8px 10px;border-radius:8px;cursor:pointer}
+    button.ghost{background:transparent;color:var(--muted);border:1px dashed rgba(255,255,255,0.03)}
+    input[type=text]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
+    ul.accepted{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;padding:0;list-style:none}
+    ul.accepted li{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;font-size:13px}
+    .meta{display:flex;gap:12px;align-items:center;color:var(--muted);font-size:13px}
+    footer{margin-top:14px;color:var(--muted);font-size:13px}
+    .sidebar h3{margin:0 0 8px}
+    .family-list{height:240px;overflow:auto;padding:8px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));}
+    .family-list button{width:100%;text-align:left;padding:8px;border-radius:6px}
+    .score{font-size:18px;font-weight:700;color:#fff}
+    .small{font-size:12px;color:var(--muted)}
+    @media(max-width:900px){.board{grid-template-columns:1fr;}.family{font-size:36px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Word Families — Simple JS Game</h1>
+        <p class="lead">Type words that belong to the shown word family (rhyme ending). Try to get as many unique correct words as you can!</p>
+      </div>
+      <div class="meta">
+        <div class="score" id="score">Score: 0</div>
+        <div class="small" id="roundInfo">Round: 0</div>
+      </div>
+    </header>
+
+    <div class="board">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="family-box">
+            <div class="family" id="family">-at</div>
+            <div style="color:var(--muted)">Family ending</div>
+          </div>
+          <div class="controls">
+            <button id="newRound">New Round</button>
+            <button id="hint" class="ghost">Give Hint</button>
+            <button id="showAll" class="ghost">Show Sample Words</button>
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.02);margin:12px 0">
+
+        <label for="wordInput" class="small">Type a word that fits this family:</label>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="wordInput" type="text" placeholder="enter a word like 'cat'" autocomplete="off" />
+          <button id="submit">Enter</button>
+        </div>
+        <div id="message" class="small" style="margin-top:8px;color:var(--muted)">
+          Tip: words must end in the family letters — plurals and simple changes allowed (e.g., cats is accepted for -at family).
+        </div>
+
+        <ul class="accepted" id="acceptedList" aria-live="polite"></ul>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+          <div class="small">Time per round: <span id="timer">—</span></div>
+          <div class="small">Accepted: <span id="acceptedCount">0</span></div>
+          <div class="small">Remaining in family: <span id="remainingCount">—</span></div>
+        </div>
+
+        <footer>
+          <div class="small">This uses a large set of common English word families (not every possible variant). You can add more words to the sample lists in the code.</div>
+        </footer>
+      </div>
+
+      <aside class="card sidebar">
+        <h3>Word Families</h3>
+        <div class="family-list" id="familyList" tabindex="0"></div>
+
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.02);margin:12px 0">
+        <div style="display:flex;justify-content:space-between;gap:8px">
+          <button id="prev" class="ghost">Previous</button>
+          <button id="next" class="ghost">Next</button>
+          <button id="reset" class="ghost">Reset Score</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <label class="small">Round length (seconds)</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="ghost" data-time="30">30</button>
+            <button class="ghost" data-time="60">60</button>
+            <button class="ghost" data-time="120">120</button>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const FAMILIES = {
+      "-at": ["cat","bat","rat","mat","sat","that","flat","chat","gnat","scat"],
+      "-an": ["man","pan","fan","ran","can","plan","stan","scan","span","tan"]
+    };
+
+    const familyKeys = Object.keys(FAMILIES);
+    const familyMap = {};
+    Object.entries(FAMILIES).forEach(([key, arr]) => familyMap[key] = new Set(arr.map(w => w.toLowerCase())));
+
+    let currentFamily = familyKeys[0];
+    let accepted = new Set();
+    let score = 0;
+    let round = 0;
+    let timerSeconds = 60;
+    let timerId = null;
+
+    const familyEl = document.getElementById('family');
+    const acceptedList = document.getElementById('acceptedList');
+    const scoreEl = document.getElementById('score');
+    const acceptedCountEl = document.getElementById('acceptedCount');
+    const roundInfo = document.getElementById('roundInfo');
+    const wordInput = document.getElementById('wordInput');
+    const message = document.getElementById('message');
+    const timerEl = document.getElementById('timer');
+    const familyListEl = document.getElementById('familyList');
+    const remainingCountEl = document.getElementById('remainingCount');
+
+    function renderFamilyList(){
+      familyListEl.innerHTML = '';
+      familyKeys.forEach((f, i) => {
+        const btn = document.createElement('button');
+        btn.textContent = f + ' (' + (familyMap[f].size) + ')';
+        btn.addEventListener('click', () => { chooseFamily(i); startRound(); });
+        if (f === currentFamily) btn.style.outline = '2px solid rgba(6,182,212,0.15)';
+        familyListEl.appendChild(btn);
+      });
+    }
+
+    function chooseFamily(index){
+      currentFamily = familyKeys[index];
+      familyEl.textContent = currentFamily;
+      accepted.clear();
+      acceptedList.innerHTML = '';
+      acceptedCountEl.textContent = '0';
+      remainingCountEl.textContent = familyMap[currentFamily].size;
+      roundInfo.textContent = `Round: ${round}`;
+      renderFamilyList();
+    }
+
+    function startRound(){
+      round++;
+      accepted.clear();
+      acceptedList.innerHTML = '';
+      acceptedCountEl.textContent = '0';
+      remainingCountEl.textContent = familyMap[currentFamily].size;
+      roundInfo.textContent = `Round: ${round}`;
+      scoreEl.textContent = `Score: ${score}`;
+      familyEl.textContent = currentFamily;
+      wordInput.value = '';
+      wordInput.focus();
+      startTimer(timerSeconds);
+    }
+
+    function startTimer(seconds){
+      clearInterval(timerId);
+      let s = seconds;
+      timerEl.textContent = s + 's';
+      timerId = setInterval(() => {
+        s--;
+        timerEl.textContent = s + 's';
+        if (s <= 0){
+          clearInterval(timerId);
+          timerEl.textContent = 'Time!';
+          endRound();
+        }
+      }, 1000);
+    }
+
+    function endRound(){
+      const gained = accepted.size;
+      score += gained;
+      scoreEl.textContent = `Score: ${score}`;
+      message.textContent = `Round over — you found ${gained} unique words for ${currentFamily}.`;
+    }
+
+    function normalizeWord(w){
+      return w.trim().toLowerCase().replace(/[^a-z\-']/g, '');
+    }
+
+    function checkWord(word){
+      const w = normalizeWord(word);
+      if (!w) return {ok:false, reason:'empty'};
+      if (accepted.has(w)) return {ok:false, reason:'duplicate'};
+      const fam = currentFamily.replace(/^-/,'');
+      const endsWithFam = w.endsWith(fam);
+      const inSample = familyMap[currentFamily].has(w);
+      if (endsWithFam || inSample) {
+        accepted.add(w);
+        familyMap[currentFamily].delete(w);
+        remainingCountEl.textContent = familyMap[currentFamily].size - accepted.size;
+        return {ok:true};
+      }
+      return {ok:false, reason:'not-match'};
+    }
+
+    function addAcceptedToUI(w){
+      const li = document.createElement('li');
+      li.textContent = w;
+      acceptedList.appendChild(li);
+      acceptedCountEl.textContent = accepted.size;
+    }
+
+    document.getElementById('submit').addEventListener('click', () => {
+      const val = wordInput.value;
+      const res = checkWord(val);
+      if (res.ok){
+        addAcceptedToUI(normalizeWord(val));
+        message.textContent = 'Nice! Accepted.';
+        wordInput.value = '';
+        wordInput.focus();
+      } else {
+        if (res.reason === 'duplicate') message.textContent = 'You already entered that word.';
+        else if (res.reason === 'empty') message.textContent = 'Please type a word.';
+        else message.textContent = 'Not accepted — the word does not match this family.';
+      }
+    });
+
+    wordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('submit').click();
+    });
+
+    document.getElementById('newRound').addEventListener('click', () => startRound());
+    document.getElementById('hint').addEventListener('click', () => {
+      const samples = Array.from(familyMap[currentFamily] || []);
+      if (samples.length) message.textContent = `Hint: try words like "${samples[0]}"`;
+      else message.textContent = 'No sample words available for this family.';
+    });
+    document.getElementById('showAll').addEventListener('click', () => {
+      const samples = Array.from(familyMap[currentFamily] || []).slice(0,50);
+      if (samples.length) alert(`Sample words for ${currentFamily}:\n\n${samples.join(', ')}`);
+      else alert('No sample words available.');
+    });
+
+    document.getElementById('next').addEventListener('click', () => {
+      const idx = familyKeys.indexOf(currentFamily);
+      const next = (idx + 1) % familyKeys.length;
+      chooseFamily(next);
+      startRound();
+    });
+    document.getElementById('prev').addEventListener('click', () => {
+      const idx = familyKeys.indexOf(currentFamily);
+      const prev = (idx - 1 + familyKeys.length) % familyKeys.length;
+      chooseFamily(prev);
+      startRound();
+    });
+
+    document.getElementById('reset').addEventListener('click', () => {
+      score = 0; scoreEl.textContent = `Score: ${score}`; message.textContent = 'Score reset.';
+    });
+
+    document.querySelectorAll('[data-time]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        timerSeconds = parseInt(e.target.dataset.time,10);
+        message.textContent = `Round length set to ${timerSeconds}s.`;
+      });
+    });
+
+    function init(){
+      currentFamily = familyKeys[Math.floor(Math.random()*familyKeys.length)];
+      familyEl.textContent = currentFamily;
+      renderFamilyList();
+      round = 0;
+      score = 0;
+      timerEl.textContent = timerSeconds + 's';
+      remainingCountEl.textContent = familyMap[currentFamily].size;
+      message.textContent = 'Press "New Round" to start.';
+    }
+
+    init();
+  </script>
+</body>
+</html>
+

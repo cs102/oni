@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Word Families</title>
+  <link rel="stylesheet" href="css/pretty.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Oni</h1>
+        
+      </div>
+      <div class="meta">
+        <div class="score" id="score">Score: 0</div>
+        <div class="small" id="roundInfo">Round: 0</div>
+      </div>
+    </header>
+
+    <div class="board">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="family-box">
+            <div class="family" id="family">-at</div>
+            <div style="color:var(--muted)">Family ending</div>
+          </div>
+          <div class="controls">
+            <button id="newRound">New Round</button>
+            <button id="hint" class="ghost">Give Hint</button>
+            <button id="showAll" class="ghost">Show Sample Words</button>
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.02);margin:12px 0">
+
+        
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <input id="wordInput" type="text" placeholder="enter a word like 'cat'" autocomplete="off" />
+          <button id="submit">Enter</button>
+        </div>
+        <div id="message" class="small" style="margin-top:8px;color:var(--muted)">
+          Tip: words must end in the family letters — plurals and simple changes allowed (e.g., cats is accepted for -at family).
+        </div>
+
+        <ul class="accepted" id="acceptedList" aria-live="polite"></ul>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+          <div class="small">Time per round: <span id="timer">—</span></div>
+          <div class="small">Accepted: <span id="acceptedCount">0</span></div>
+        </div>
+
+        <footer>
+          <div class="small">This uses a large set of common English word families (not every possible variant).</div>
+        </footer>
+      </div>
+
+      <aside class="card sidebar">
+        <h3>Word Families</h3>
+        <div class="family-list" id="familyList" tabindex="0"></div>
+
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.02);margin:12px 0">
+        <div style="display:flex;justify-content:space-between;gap:8px">
+          <button id="prev" class="ghost">Previous</button>
+          <button id="next" class="ghost">Next</button>
+          <button id="reset" class="ghost">Reset Score</button>
+        </div>
+
+        <div style="margin-top:12px">
+          <label class="small">Round length (seconds)</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="ghost" data-time="30">30</button>
+            <button class="ghost" data-time="60">60</button>
+            <button class="ghost" data-time="120">120</button>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    // A large (but not exhaustive) set of common word families and sample words for validation.
+    // Expand these lists if you want more coverage.
+    const FAMILIES = {
+      "-at": ["cat","bat","rat","mat","sat","that","flat","chat","gnat","scat"],
+      "-an": ["man","pan","fan","ran","can","plan","stan","scan","span","tan"],
+      "-ap": ["map","cap","nap","gap","lap","trap","clap","snap","crap","wrap"],
+      "-ack": ["back","pack","jack","track","black","stack","smack","tack","sack"],
+      "-ag": ["bag","rag","tag","flag","drag","sag","nag"],
+      "-ail": ["tail","fail","mail","nail","sail","trail","gail"],
+      "-ain": ["rain","pain","train","gain","main","plain","brain"],
+      "-air": ["hair","fair","chair","stair","pair","repair"],
+      "-ake": ["make","take","rake","cake","shake","lake","fake"],
+      "-all": ["ball","call","fall","small","wall","tall","hall"],
+      "-ame": ["game","name","flame","same","shame","frame"],
+      "-anl": ["panel","canal"],
+      "-and": ["hand","sand","land","band","stand","brand"],
+      "-ang": ["hang","rang","sang","bang","clang"],
+      "-ank": ["bank","tank","rank","thank","blank"],
+      "-are": ["care","share","bare","dare","fare"],
+      "-ash": ["ash","bash","cash","flash","rash"],
+      "-ay": ["day","say","play","stay","ray","bay","tray"],
+      "-ed": ["played","called","walked","talked","jumped"],
+      "-ee": ["see","tree","bee","free","need","speed"],
+      "-en": ["pen","hen","men","ten","when","open"],
+      "-ew": ["few","new","blew","chew","stew"],
+      "-ib": ["crib","drib"],
+      "-ick": ["click","brick","stick","pick","sick","nick"],
+      "-ide": ["ride","hide","side","slide","pride"],
+      "-ight": ["light","night","fight","might","sight"],
+      "-ill": ["hill","bill","fill","will","still","kill"],
+      "-in": ["pin","win","tin","skin","begin","chin"],
+      "-ing": ["sing","ring","bring","king","wing"],
+      "-ink": ["link","sink","think","pink","blink"],
+      "-ip": ["sip","lip","ship","trip","clip"],
+      "-ist": ["list","mist","fist","twist"],
+      "-ite": ["bite","kite","site","white","write"],
+      "-ive": ["live","give","drive","survive"],
+      "-oat": ["boat","coat","float","moat"],
+      "-ock": ["rock","sock","lock","dock","shock","clock"],
+      "-og": ["dog","frog","log","jog","hog"],
+      "-oke": ["joke","poke","smoke","broke"],
+      "-old": ["cold","bold","fold","hold","gold"],
+      "-op": ["pop","hop","stop","shop","top"],
+      "-ore": ["more","store","core","score","before"],
+      "-ow": ["cow","now","how","now","bow","show"],
+      "-ub": ["rub","tub","sub","club"],
+      "-ug": ["bug","rug","hug","mug","slug"],
+      "-ump": ["jump","bump","dump","lump"],
+      "-use": ["use","reuse","abuse","fuse"],
+      "-ust": ["dust","must","rust","bust"],
+      "-y": ["play","say","day","way","bay"],
+      "-tion": ["action","station","nation","question"],
+      "-sion": ["vision","mission","decision"],
+      "-ce": ["place","space","face","grace"],
+      "-ge": ["page","stage","age","gauge"],
+      "-ure": ["pure","sure","figure","secure"],
+      "-ble": ["table","cable","stable","fable"],
+      "-ment": ["moment","comment","payment"],
+      "-ness": ["happiness","darkness","brightness"],
+      "-ful": ["joyful","helpful","careful"],
+      "-less": ["careless","hopeless","wireless"],
+      "-ly": ["quickly","happily","slowly"],
+      "-est": ["biggest","smallest","fastest"],
+      "-er": ["bigger","faster","teacher","runner"],
+      "-or": ["actor","doctor","creator"],
+      "-ist2": ["artist","pianist","scientist"],
+      "-ous": ["dangerous","famous","jealous"],
+      "-ive2": ["active","creative","responsive"],
+      "-en2": ["golden","wooden","frozen"]
+    };
+
+    // Normalize family keys (remove trailing numbers we used to keep unique suffix names)
+    const familyKeys = Object.keys(FAMILIES).map(k => k.replace(/[0-9]+$/, ''));
+    const uniqueFamilies = Array.from(new Set(familyKeys));
+
+    // Build a normalized map: family -> Set(words lowercased)
+    const familyMap = {};
+    Object.entries(FAMILIES).forEach(([key, arr]) => {
+      const familyKey = key.replace(/[0-9]+$/, '');
+      familyMap[familyKey] = (familyMap[familyKey] || new Set());
+      arr.forEach(w => familyMap[familyKey].add(w.toLowerCase()));
+    });
+
+    // Flatten a quick lookup of words -> family (for bonus validation). If a word appears in multiple families, we keep all.
+    const wordToFamilies = {};
+    Object.entries(familyMap).forEach(([fam, set]) => {
+      set.forEach(w => {
+        wordToFamilies[w] = wordToFamilies[w] || new Set();
+        wordToFamilies[w].add(fam);
+      });
+    });
+
+    // Game state
+    let currentFamily = uniqueFamilies[0];
+    let accepted = new Set();
+    let score = 0;
+    let round = 0;
+    let timerSeconds = 60;
+    let timerId = null;
+
+    // DOM refs
+    const familyEl = document.getElementById('family');
+    const acceptedList = document.getElementById('acceptedList');
+    const scoreEl = document.getElementById('score');
+    const acceptedCountEl = document.getElementById('acceptedCount');
+    const roundInfo = document.getElementById('roundInfo');
+    const wordInput = document.getElementById('wordInput');
+    const message = document.getElementById('message');
+    const timerEl = document.getElementById('timer');
+    const familyListEl = document.getElementById('familyList');
+
+    // Populate family list UI
+    function renderFamilyList(){
+      familyListEl.innerHTML = '';
+      uniqueFamilies.forEach((f, i) => {
+        const btn = document.createElement('button');
+        btn.textContent = f + ' (' + (familyMap[f] ? familyMap[f].size : 0) + ')';
+        btn.addEventListener('click', () => { chooseFamily(i); startRound(); });
+        if (f === currentFamily) btn.style.outline = '2px solid rgba(6,182,212,0.15)';
+        familyListEl.appendChild(btn);
+      });
+    }
+
+    function chooseFamily(index){
+      currentFamily = uniqueFamilies[index];
+      familyEl.textContent = currentFamily;
+      accepted.clear();
+      acceptedList.innerHTML = '';
+      acceptedCountEl.textContent = '0';
+      roundInfo.textContent = `Round: ${round}`;
+      renderFamilyList();
+    }
+
+    function startRound(){
+      round++;
+      accepted.clear();
+      acceptedList.innerHTML = '';
+      acceptedCountEl.textContent = '0';
+      roundInfo.textContent = `Round: ${round}`;
+      scoreEl.textContent = `Score: ${score}`;
+      familyEl.textContent = currentFamily;
+      wordInput.value = '';
+      wordInput.focus();
+      startTimer(timerSeconds);
+    }
+
+    function startTimer(seconds){
+      clearInterval(timerId);
+      let s = seconds;
+      timerEl.textContent = s + 's';
+      timerId = setInterval(() => {
+        s--;
+        timerEl.textContent = s + 's';
+        if (s <= 0){
+          clearInterval(timerId);
+          timerEl.textContent = 'Time!';
+          endRound();
+        }
+      }, 1000);
+    }
+
+    function endRound(){
+      // award points: 1 point per accepted word
+      const gained = accepted.size;
+      score += gained;
+      scoreEl.textContent = `Score: ${score}`;
+      message.textContent = `Round over — you found ${gained} unique words for ${currentFamily}.`;
+    }
+
+    function normalizeWord(w){
+      return w.trim().toLowerCase().replace(/[^a-z\-']/g, '');
+    }
+
+    function checkWord(word){
+      const w = normalizeWord(word);
+      if (!w) return {ok:false, reason:'empty'};
+      if (accepted.has(w)) return {ok:false, reason:'duplicate'};
+
+      // Accept ONLY if it's present in our sample list for that family
+      const inSample = familyMap[currentFamily] && familyMap[currentFamily].has(w);
+
+      if (inSample) {
+        accepted.add(w);
+        return {ok:true};
+      }
+      // Bonus: if the word exists in our map but maps to other families, tell user
+      if (wordToFamilies[w] && wordToFamilies[w].size > 0){
+        return {ok:false, reason:'other-family', families:Array.from(wordToFamilies[w])};
+      }
+      return {ok:false, reason:'not-match'};
+    }
+
+    function addAcceptedToUI(w){
+      const li = document.createElement('li');
+      li.textContent = w;
+      acceptedList.appendChild(li);
+      acceptedCountEl.textContent = accepted.size;
+    }
+
+    // Event handlers
+    document.getElementById('submit').addEventListener('click', () => {
+      const val = wordInput.value;
+      const res = checkWord(val);
+      if (res.ok){
+        addAcceptedToUI(normalizeWord(val));
+        message.textContent = 'Nice! Accepted.';
+        wordInput.value = '';
+        wordInput.focus();
+      } else {
+        if (res.reason === 'duplicate') message.textContent = 'You already entered that word.';
+        else if (res.reason === 'empty') message.textContent = 'Please type a word.';
+        else if (res.reason === 'other-family') message.textContent = `That word matches another family: ${res.families.join(', ')}.`;
+        else message.textContent = 'Not accepted — the word does not match this family.';
+      }
+    });
+
+    wordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('submit').click();
+    });
+
+    document.getElementById('newRound').addEventListener('click', () => startRound());
+    document.getElementById('hint').addEventListener('click', () => {
+      // give a short hint: show one sample word
+      const samples = Array.from(familyMap[currentFamily] || []);
+      if (samples.length) message.textContent = `Hint: try words like "${samples[0]}"`;
+      else message.textContent = 'No sample words available for this family.';
+    });
+    document.getElementById('showAll').addEventListener('click', () => {
+      const samples = Array.from(familyMap[currentFamily] || []).slice(0,50);
+      if (samples.length) alert(`Sample words for ${currentFamily}:
+
+${samples.join(', ')}`);
+      else alert('No sample words available.');
+    });
+
+    // Prev/Next
+    document.getElementById('next').addEventListener('click', () => {
+      const idx = uniqueFamilies.indexOf(currentFamily);
+      const next = (idx + 1) % uniqueFamilies.length;
+      chooseFamily(next);
+      startRound();
+    });
+    document.getElementById('prev').addEventListener('click', () => {
+      const idx = uniqueFamilies.indexOf(currentFamily);
+      const prev = (idx - 1 + uniqueFamilies.length) % uniqueFamilies.length;
+      chooseFamily(prev);
+      startRound();
+    });
+
+    document.getElementById('reset').addEventListener('click', () => {
+      score = 0; scoreEl.textContent = `Score: ${score}`; message.textContent = 'Score reset.';
+    });
+
+    document.querySelectorAll('[data-time]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        timerSeconds = parseInt(e.target.dataset.time,10);
+        message.textContent = `Round length set to ${timerSeconds}s.`;
+      });
+    });
+
+    // Initialize
+    function init(){
+      // pick a random starting family
+      currentFamily = uniqueFamilies[Math.floor(Math.random()*uniqueFamilies.length)];
+      familyEl.textContent = currentFamily;
+      renderFamilyList();
+      round = 0;
+      score = 0;
+      timerEl.textContent = timerSeconds + 's';
+      message.textContent = 'Press "New Round" to start.';
+    }
+
+    init();
+  </script>
+</body>
+</html>
+
