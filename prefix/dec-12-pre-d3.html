@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prefix Categories Tree using D3.js</title>
+    
+    <!-- D3.js CDN -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #tree-container {
+            margin-top: 20px;
+            width: 100%;
+            height: 600px;
+        }
+
+        .node {
+            cursor: pointer;
+        }
+
+        .node:hover {
+            fill: #ff8c00;
+        }
+
+        .node text {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 1.5px;
+        }
+
+        .collapsed .node > circle {
+            fill: #ffb3b3;
+        }
+
+        .expanded .node > circle {
+            fill: #b3ffcc;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Prefix Categories and Prefixes</h1>
+
+    <div id="tree-container"></div>
+
+    <script>
+        // Prefix tree data
+        const prefixData = {
+            "name": "Prefixes",
+            "children": [
+                {
+                    "name": "Negation",
+                    "children": [
+                        { "name": "un-" },
+                        { "name": "in-" },
+                        { "name": "im-" },
+                        { "name": "dis-" },
+                        { "name": "non-" }
+                    ]
+                },
+                {
+                    "name": "Quantity",
+                    "children": [
+                        { "name": "bi-" },
+                        { "name": "mono-" },
+                        { "name": "poly-" },
+                        { "name": "multi-" },
+                        { "name": "duo-" },
+                        { "name": "tri-" },
+                        { "name": "quad-" },
+                        { "name": "centi-" },
+                        { "name": "milli-" },
+                        { "name": "kilo-" },
+                        { "name": "mega-" },
+                        { "name": "giga-" }
+                    ]
+                },
+                {
+                    "name": "Size/degree",
+                    "children": [
+                        { "name": "micro-" },
+                        { "name": "nano-" },
+                        { "name": "pico-" },
+                        { "name": "giga-" },
+                        { "name": "mega-" },
+                        { "name": "centi-" },
+                        { "name": "milli-" }
+                    ]
+                },
+                {
+                    "name": "Time",
+                    "children": [
+                        { "name": "pre-" },
+                        { "name": "post-" },
+                        { "name": "sub-" },
+                        { "name": "inter-" },
+                        { "name": "ante-" }
+                    ]
+                },
+                {
+                    "name": "Direction",
+                    "children": [
+                        { "name": "re-" },
+                        { "name": "anti-" },
+                        { "name": "auto-" },
+                        { "name": "counter-" },
+                        { "name": "co-" }
+                    ]
+                },
+                {
+                    "name": "Other",
+                    "children": [
+                        { "name": "anti-" },
+                        { "name": "auto-" },
+                        { "name": "trans-" },
+                        { "name": "extra-" },
+                        { "name": "hyper-" },
+                        { "name": "super-" },
+                        { "name": "under-" },
+                        { "name": "over-" },
+                        { "name": "sub-" },
+                        { "name": "inter-" },
+                        { "name": "intra-" },
+                        { "name": "ex-" },
+                        { "name": "mis-" }
+                    ]
+                }
+            ]
+        };
+
+        // Set the dimensions for the tree
+        const margin = { top: 20, right: 120, bottom: 20, left: 120 },
+              width = window.innerWidth - margin.right - margin.left,
+              height = window.innerHeight - margin.top - margin.bottom;
+
+        // Create the SVG container
+        const svg = d3.select("#tree-container")
+                      .append("svg")
+                      .attr("width", width + margin.right + margin.left)
+                      .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // Create a tree layout
+        const tree = d3.tree()
+                       .size([height, width]);
+
+        // Set the root data
+        const root = d3.hierarchy(prefixData);
+
+        // Calculate the tree layout
+        tree(root);
+
+        // Add links (lines) between nodes
+        svg.selectAll(".link")
+           .data(root.links())
+           .enter().append("path")
+           .attr("class", "link")
+           .attr("d", d3.linkHorizontal()
+                        .x(d => d.y)
+                        .y(d => d.x));
+
+        // Add nodes (circles)
+        const node = svg.selectAll(".node")
+                        .data(root.descendants())
+                        .enter().append("g")
+                        .attr("class", "node")
+                        .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
+
+        // Add circles for nodes
+        node.append("circle")
+            .attr("r", 10)
+            .attr("class", "node");
+
+        // Add text for each node
+        node.append("text")
+            .attr("dy", 3)
+            .attr("x", d => d.children ? -15 : 15)
+            .style("text-anchor", d => d.children ? "end" : "start")
+            .text(d => d.data.name);
+
+        // Toggle children on click to collapse/expand
+        node.on("click", function(event, d) {
+            d.children = d.children ? null : d._children;
+            update(root);
+        });
+
+        // Function to update the tree when collapsing/expanding
+        function update(source) {
+            const nodes = root.descendants(),
+                  links = root.links();
+
+            // Update nodes
+            svg.selectAll(".node")
+                .data(nodes, d => d.id || (d.id = ++i));
+
+            // Update links
+            svg.selectAll(".link")
+                .data(links, d => d.target.id);
+
+            // Recompute the tree layout after changes
+            tree(root);
+
+            svg.selectAll(".link")
+               .transition()
+               .duration(500)
+               .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x));
+
+            svg.selectAll(".node")
+               .transition()
+               .duration(500)
+               .attr("transform", d => "translate(" + d.y + "," + d.x + ")");
+        }
+
+    </script>
+
+</body>
+</html>
+

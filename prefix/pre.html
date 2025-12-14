@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Small World — 100 English Prefixes</title>
+  <style>
+    :root{--bg:#0f1724;--panel:#0b1220;--muted:#9aa4b2}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#07111a 0%, #081826 100%);font-family:Inter,ui-sans-serif,system-ui,Arial;color:#e6eef6}
+    .app{display:flex;height:100vh;gap:12px;padding:16px;box-sizing:border-box}
+    .left{flex:1;position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 6px 30px rgba(2,6,23,0.7)}
+    svg{width:100%;height:100%;display:block}
+    .right{width:360px;padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 6px 30px rgba(2,6,23,0.7)}
+    h1{margin:4px 0 8px;font-size:18px}
+    p.muted{color:var(--muted);font-size:13px;margin:0 0 12px}
+    .legend{display:flex;flex-wrap:wrap;gap:8px}
+    .legend .item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:13px}
+    .dot{width:14px;height:14px;border-radius:6px}
+    .controls{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+    .btn{background:#0d1b2a;border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;color:#cfe6ff;cursor:pointer}
+    .info{margin-top:12px;padding:10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));min-height:90px}
+    .info h2{margin:0 0 6px;font-size:15px}
+    .info p{margin:0;color:var(--muted);font-size:13px}
+    .small{font-size:12px;color:var(--muted);margin-top:8px}
+    footer{position:absolute;left:10px;bottom:10px;color:var(--muted);font-size:12px}
+    /* Node styles via classes created in JS */
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="left" id="canvasWrap">
+      <svg id="svg"></svg>
+      <footer>Drag nodes, click a node to see meaning. Use the controls on the right to rewire / reset.</footer>
+    </div>
+
+    <div class="right">
+      <h1>Small World — 100 English Prefixes</h1>
+      <p class="muted">Nodes are prefixes. Colors = category. Click a node to show the meaning and category. Drag to move nodes; double-click to pin/unpin.</p>
+
+      <div id="legend" class="legend"></div>
+
+      <div class="controls">
+        <button id="rewireBtn" class="btn">Rewire (randomize edges)</button>
+        <button id="resetBtn" class="btn">Reset positions</button>
+        <label class="small">Rewiring probability: <input id="prob" type="range" min="0" max="0.5" step="0.01" value="0.1"></label>
+        <label class="small">Neighbour count (k): <input id="kval" type="range" min="2" max="8" step="1" value="4"></label>
+      </div>
+
+      <div class="info" id="info">
+        <h2>Selected</h2>
+        <p id="sel">Click any node to display its meaning here.</p>
+        <div id="meta" class="small"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // --- Data: 100 prefixes with meaning + category ---
+    const prefixes = [
+      {p:'un', m:'not; opposite of', c:'Negation'},
+      {p:'in', m:'not; into', c:'Negation/Direction'},
+      {p:'im', m:'not (before b,p,m)', c:'Negation'},
+      {p:'il', m:'not (before l)', c:'Negation'},
+      {p:'ir', m:'not (before r)', c:'Negation'},
+      {p:'dis', m:'not; opposite of', c:'Negation'},
+      {p:'non', m:'not; absence of', c:'Negation'},
+      {p:'re', m:'again; back', c:'Repetition/Order'},
+      {p:'pre', m:'before', c:'Time/Order'},
+      {p:'post', m:'after', c:'Time/Order'},
+      {p:'fore', m:'before; front', c:'Time/Position'},
+      {p:'pro', m:'forward; in favor of', c:'Direction/Relation'},
+      {p:'contra', m:'against', c:'Opposition'},
+      {p:'counter', m:'opposite', c:'Opposition'},
+      {p:'anti', m:'against; opposing', c:'Opposition'},
+      {p:'over', m:'above; excessive', c:'Amount/Intensity'},
+      {p:'under', m:'below; insufficient', c:'Amount/Intensity'},
+      {p:'sub', m:'under; below', c:'Position'},
+      {p:'super', m:'above; beyond', c:'Position/Intensity'},
+      {p:'supra', m:'above; over', c:'Position'},
+      {p:'trans', m:'across; beyond', c:'Direction'},
+      {p:'inter', m:'between; among', c:'Relation'},
+      {p:'intra', m:'within', c:'Relation'},
+      {p:'intro', m:'into; inward', c:'Direction'},
+      {p:'en', m:'cause to; put into', c:'Formation'},
+      {p:'em', m:'cause to (before b,p,m)', c:'Formation'},
+      {p:'ex', m:'out; former', c:'Direction/Status'},
+      {p:'out', m:'outside; surpass', c:'Direction/Comparison'},
+      {p:'auto', m:'self', c:'Self/Identity'},
+      {p:'bi', m:'two', c:'Number'},
+      {p:'tri', m:'three', c:'Number'},
+      {p:'quad', m:'four', c:'Number'},
+      {p:'multi', m:'many', c:'Number/Amount'},
+      {p:'poly', m:'many', c:'Number/Amount'},
+      {p:'mono', m:'one; single', c:'Number'},
+      {p:'uni', m:'one', c:'Number'},
+      {p:'semi', m:'half; partial', c:'Amount'},
+      {p:'demi', m:'half', c:'Amount'},
+      {p:'hemi', m:'half', c:'Amount'},
+      {p:'micro', m:'small', c:'Scale/Size'},
+      {p:'macro', m:'large', c:'Scale/Size'},
+      {p:'mega', m:'great; million', c:'Scale/Measurement'},
+      {p:'kilo', m:'thousand', c:'Scale/Measurement'},
+      {p:'milli', m:'thousandth', c:'Scale/Measurement'},
+      {p:'centi', m:'hundredth', c:'Scale/Measurement'},
+      {p:'deci', m:'tenth', c:'Scale/Measurement'},
+      {p:'nano', m:'billionth', c:'Scale/Measurement'},
+      {p:'pico', m:'trillionth', c:'Scale/Measurement'},
+      {p:'giga', m:'billion', c:'Scale/Measurement'},
+      {p:'tera', m:'trillion', c:'Scale/Measurement'},
+      {p:'hyper', m:'over; excessive', c:'Amount/Intensity'},
+      {p:'hypo', m:'under; deficient', c:'Amount/Intensity'},
+      {p:'para', m:'beside; abnormal', c:'Position/Relation'},
+      {p:'peri', m:'around', c:'Position/Relation'},
+      {p:'circum', m:'around', c:'Position/Relation'},
+      {p:'tele', m:'distant', c:'Distance'},
+      {p:'retro', m:'backward', c:'Time/Direction'},
+      {p:'neo', m:'new', c:'Time/Quality'},
+      {p:'arch', m:'chief; ancient', c:'Status/Quality'},
+      {p:'proto', m:'first', c:'Order'},
+      {p:'pseudo', m:'false', c:'Quality'},
+      {p:'quasi', m:'seemingly; almost', c:'Quality'},
+      {p:'vice', m:'in place of', c:'Role/Relation'},
+      {p:'co', m:'with; together', c:'Relation'},
+      {p:'com', m:'with; together (before b,p,m)', c:'Relation'},
+      {p:'con', m:'with; together', c:'Relation'},
+      {p:'syn', m:'together; with', c:'Relation'},
+      {p:'sym', m:'together (before b,m,p)', c:'Relation'},
+      {p:'dia', m:'through; across', c:'Direction'},
+      {p:'per', m:'through; thoroughly', c:'Direction/Intensity'},
+      {p:'pan', m:'all', c:'Scope'},
+      {p:'omni', m:'all; everywhere', c:'Scope'},
+      {p:'eu', m:'good; well', c:'Quality'},
+      {p:'mal', m:'bad; ill', c:'Quality'},
+      {p:'bene', m:'good; well', c:'Quality'},
+      {p:'bio', m:'life', c:'Field/Biology'},
+      {p:'geo', m:'earth', c:'Field/Geography'},
+      {p:'aero', m:'air', c:'Field/Science'},
+      {p:'hydro', m:'water', c:'Field/Science'},
+      {p:'thermo', m:'heat', c:'Field/Science'},
+      {p:'photo', m:'light', c:'Field/Science'},
+      {p:'chromo', m:'color', c:'Field/Science'},
+      {p:'litho', m:'stone', c:'Field/Science'},
+      {p:'phon', m:'sound', c:'Field/Science'},
+      {p:'socio', m:'society', c:'Field/Social'},
+      {p:'techno', m:'art; skill; technology', c:'Field/Tech'},
+      {p:'demo', m:'people', c:'Field/Social'},
+      {p:'erg', m:'work', c:'Field/Science'},
+      {p:'exo', m:'outside', c:'Position'},
+      {p:'endo', m:'inside', c:'Position'}
+    ];
+
+    // --- Category -> color mapping (auto-generate palette) ---
+    const categories = [...new Set(prefixes.map(x=>x.c))];
+    const palette = [
+      '#f97316','#06b6d4','#f43f5e','#60a5fa','#34d399','#f59e0b','#a78bfa','#ef4444','#10b981','#f472b6','#60a5fa','#facc15'
+    ];
+    const catColor = {};
+    categories.forEach((c,i)=>catColor[c]=palette[i % palette.length]);
+
+    // --- Build nodes and edges using a Watts-Strogatz-like model ---
+    const N = prefixes.length; // 100
+    let nodes = prefixes.map((d,i)=>({id:i, prefix:d.p, meaning:d.m, category:d.c, x:0,y:0, vx:0, vy:0, pinned:false}));
+
+    function makeEdges(k=4, p=0.1){
+      const edges = [];
+      // ring lattice: connect each node to k nearest neighbors (k/2 each side)
+      for(let i=0;i<N;i++){
+        for(let j=1;j<=k/2;j++){
+          const a=i; const b=(i+j)%N;
+          edges.push({source:a,target:b});
+        }
+      }
+      // rewire
+      for(let i=0;i<edges.length;i++){
+        if(Math.random() < p){
+          // rewire target to a random node not equal source and not duplicate
+          const src = edges[i].source;
+          let tgt = Math.floor(Math.random()*N);
+          const exists = (s,t)=>edges.some(e=> (e.source===s && e.target===t) || (e.source===t && e.target===s));
+          let tries=0;
+          while((tgt===src || exists(src,tgt)) && tries<200){tgt=Math.floor(Math.random()*N);tries++;}
+          edges[i].target=tgt;
+        }
+      }
+      return edges;
+    }
+
+    let K = parseInt(document.getElementById('kval').value,10);
+    let P = parseFloat(document.getElementById('prob').value);
+    let edges = makeEdges(K,P);
+
+    // --- SVG rendering ---
+    const svg = document.getElementById('svg');
+    const svgNS = 'http://www.w3.org/2000/svg';
+
+    function render(){
+      svg.innerHTML='';
+      // edges
+      edges.forEach((e,i)=>{
+        const line = document.createElementNS(svgNS,'line');
+        line.setAttribute('stroke','rgba(255,255,255,0.08)');
+        line.setAttribute('stroke-width','1');
+        line.dataset.i = i;
+        svg.appendChild(line);
+      });
+      // nodes
+      nodes.forEach((n,i)=>{
+        const g = document.createElementNS(svgNS,'g');
+        g.classList.add('node');
+        g.dataset.i = i;
+        // circle
+        const circle = document.createElementNS(svgNS,'circle');
+        circle.setAttribute('r',12);
+        circle.setAttribute('stroke','rgba(0,0,0,0.4)');
+        circle.setAttribute('stroke-width',2);
+        circle.setAttribute('fill',catColor[n.category]);
+        circle.style.cursor='pointer';
+        g.appendChild(circle);
+        // text
+        const text = document.createElementNS(svgNS,'text');
+        text.setAttribute('x',16);
+        text.setAttribute('y',6);
+        text.setAttribute('fill','#e6eef6');
+        text.setAttribute('font-size',12);
+        text.textContent = n.prefix;
+        g.appendChild(text);
+        svg.appendChild(g);
+      });
+    }
+
+    // initial layout: place clusters by category angle
+    function initPositions(){
+      const w = svg.clientWidth || svg.parentElement.clientWidth;
+      const h = svg.clientHeight || svg.parentElement.clientHeight;
+      const centerX = w/2, centerY = h/2, radius = Math.min(w,h)/3;
+      const catList = categories;
+      const catToNodes = {};
+      nodes.forEach(n=>{catToNodes[n.category]=catToNodes[n.category]||[];catToNodes[n.category].push(n);});
+      const angleStep = (2*Math.PI)/catList.length;
+      catList.forEach((c,ci)=>{
+        const angle = ci*angleStep;
+        const cx = centerX + Math.cos(angle)*radius;
+        const cy = centerY + Math.sin(angle)*radius;
+        const group = catToNodes[c];
+        if(!group) return;
+        for(let i=0;i<group.length;i++){
+          const a = (i/group.length)*Math.PI*2;
+          const r = 40 + Math.random()*60;
+          group[i].x = cx + Math.cos(a)*r + (Math.random()-0.5)*20;
+          group[i].y = cy + Math.sin(a)*r + (Math.random()-0.5)*20;
+        }
+      });
+    }
+
+    // simulation
+    let running=false;
+    function step(){
+      const w = svg.clientWidth || svg.parentElement.clientWidth;
+      const h = svg.clientHeight || svg.parentElement.clientHeight;
+      // forces
+      // repulsion
+      const repulseK = 600;
+      for(let i=0;i<N;i++){
+        for(let j=i+1;j<N;j++){
+          const a=nodes[i], b=nodes[j];
+          let dx=a.x-b.x, dy=a.y-b.y;
+          let dist2 = dx*dx+dy*dy + 0.01;
+          let dist = Math.sqrt(dist2);
+          let f = repulseK / dist2;
+          let ux = dx/dist, uy=dy/dist;
+          a.vx += ux*f; a.vy += uy*f;
+          b.vx -= ux*f; b.vy -= uy*f;
+        }
+      }
+      // spring edges
+      const springLen = 300;
+      const springK = 0.02;
+      edges.forEach(e=>{
+        const a = nodes[e.source], b = nodes[e.target];
+        let dx = b.x - a.x, dy = b.y - a.y;
+        let dist = Math.sqrt(dx*dx+dy*dy) + 0.01;
+        let force = (dist - springLen) * springK;
+        let ux = dx/dist, uy = dy/dist;
+        a.vx += ux*force; a.vy += uy*force;
+        b.vx -= ux*force; b.vy -= uy*force;
+      });
+      // damping & integrate
+      for(let i=0;i<N;i++){
+        const n = nodes[i];
+        if(n.pinned) { n.vx= n.vy=0; continue; }
+        n.vx *= 0.85; n.vy *= 0.85;
+        n.x += n.vx; n.y += n.vy;
+        // bounds
+        n.x = Math.max(20, Math.min((w-20), n.x));
+        n.y = Math.max(20, Math.min((h-20), n.y));
+      }
+
+      // update svg positions
+      const groups = svg.querySelectorAll('g.node');
+      groups.forEach(g=>{
+        const i = +g.dataset.i; const n = nodes[i];
+        const circle = g.querySelector('circle');
+        const text = g.querySelector('text');
+        circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y);
+        text.setAttribute('x', n.x + 16); text.setAttribute('y', n.y + 6);
+      });
+      // lines
+      const lines = svg.querySelectorAll('line');
+      lines.forEach((line, idx)=>{
+        const e = edges[idx];
+        const a = nodes[e.source], b = nodes[e.target];
+        line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+        line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+      });
+
+      if(running) requestAnimationFrame(step);
+    }
+
+    // interactions: drag, click
+    let drag = {active:false, node:null, offsetX:0, offsetY:0};
+    svg.addEventListener('pointerdown', e=>{
+      const target = e.target.closest('g.node');
+      if(!target) return;
+      const i = +target.dataset.i; const n = nodes[i];
+      drag.active=true; drag.node=n; drag.offsetX = e.clientX - n.x; drag.offsetY = e.clientY - n.y;
+      svg.setPointerCapture(e.pointerId);
+    });
+    svg.addEventListener('pointermove', e=>{
+      if(!drag.active) return;
+      const n = drag.node;
+      n.x = e.clientX - drag.offsetX;
+      n.y = e.clientY - drag.offsetY;
+      n.vx = n.vy = 0;
+      render(); // quick update
+    });
+    svg.addEventListener('pointerup', e=>{ if(drag.active){ drag.active=false; drag.node=null; svg.releasePointerCapture(e.pointerId);} });
+
+    svg.addEventListener('click', e=>{
+      const g = e.target.closest('g.node');
+      if(!g) return;
+      const i = +g.dataset.i; const n = nodes[i];
+      showInfo(n);
+    });
+    svg.addEventListener('dblclick', e=>{
+      const g = e.target.closest('g.node');
+      if(!g) return;
+      const i = +g.dataset.i; const n = nodes[i];
+      n.pinned = !n.pinned;
+      showInfo(n);
+    });
+
+    function showInfo(n){
+      const sel = document.getElementById('sel');
+      const meta = document.getElementById('meta');
+      sel.innerHTML = `<strong style="color:${catColor[n.category]}"> ${n.prefix}</strong> — ${n.meaning}`;
+      meta.innerHTML = `Category: <span style="color:${catColor[n.category]}">${n.category}</span><br>Node ID: ${n.id} <br>Pinned: ${n.pinned}`;
+    }
+
+    // legend
+    function buildLegend(){
+      const el = document.getElementById('legend'); el.innerHTML='';
+      categories.forEach(c=>{
+        const div = document.createElement('div'); div.className='item';
+        const d = document.createElement('span'); d.className='dot'; d.style.background=catColor[c];
+        const t = document.createElement('div'); t.innerHTML=`<strong style="font-size:13px">${c}</strong><div style="font-size:12px;color:var(--muted)">${prefixes.filter(p=>p.c===c).length} prefixes</div>`;
+        div.appendChild(d); div.appendChild(t); el.appendChild(div);
+      });
+    }
+
+    // controls
+    document.getElementById('rewireBtn').addEventListener('click', ()=>{
+      P = parseFloat(document.getElementById('prob').value);
+      K = parseInt(document.getElementById('kval').value,10);
+      edges = makeEdges(K,P);
+      render();
+    });
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      initPositions(); nodes.forEach(n=>{n.vx=0;n.vy=0;n.pinned=false}); render();
+    });
+    document.getElementById('prob').addEventListener('input', e=>{ document.querySelector('label.small').innerText = `Rewiring probability: ${e.target.value}`; });
+    document.getElementById('kval').addEventListener('input', e=>{ document.querySelectorAll('label.small')[1].innerText = `Neighbour count (k): ${e.target.value}`; });
+
+    // initial run
+    function start(){
+      initPositions(); buildLegend(); render(); running=true; requestAnimationFrame(step);
+    }
+    window.addEventListener('resize', ()=>{ render(); });
+    start();
+  </script>
+</body>
+</html>
+

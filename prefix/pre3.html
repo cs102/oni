@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Small World — 100 English Prefixes</title>
+  <style>
+    :root{--bg:#0f1724;--panel:#0b1220;--muted:#9aa6b2}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:#e6eef6}
+    .app{display:grid;grid-template-columns:1fr 320px;gap:12px;height:100vh;padding:12px}
+    .graph-card{background:linear-gradient(180deg,#07101a 0,#081722 100%);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(3,6,12,.6)}
+    svg{width:100%;height:100%;display:block}
+    .controls{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+    .btn{background:#0e2a3a;border:1px solid rgba(255,255,255,.03);padding:6px 10px;border-radius:8px;color:#cfe9ff;cursor:pointer}
+    .legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .legend-item{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:8px;background:rgba(255,255,255,.02)}
+    .dot{width:14px;height:14px;border-radius:50%}
+    .side{background:var(--panel);border-radius:12px;padding:12px;display:flex;flex-direction:column}
+    .side h3{margin:4px 0 8px}
+    .meta{font-size:13px;color:var(--muted);margin-bottom:8px}
+    .prefix-badge{display:inline-block;padding:8px 12px;border-radius:8px;font-weight:700;margin-bottom:8px}
+    .meaning{padding:10px;border-radius:8px;background:rgba(255,255,255,.03)}
+    .tooltip{position:absolute;pointer-events:none;padding:6px 8px;border-radius:6px;background:#071017;border:1px solid rgba(255,255,255,.04);font-size:13px}
+    .footer{margin-top:auto;font-size:12px;color:var(--muted)}
+    .error{color:#ffb4b4;background:rgba(255,180,180,0.04);padding:8px;border-radius:8px;margin-bottom:8px}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="graph-card">
+      <div class="controls">
+        <button id="restart" class="btn">Restart (small-world)</button>
+        <label style="display:flex;align-items:center;gap:8px;color:var(--muted)">Rewire p
+          <input id="rewire" type="range" min="0" max="1" step="0.01" value="0.1" style="width:160px;margin-left:8px">
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;color:var(--muted)">Node size
+          <input id="nodesize" type="range" min="3" max="10" step="1" value="6" style="width:100px;margin-left:8px">
+        </label>
+        <div style="margin-left:auto;color:var(--muted);font-size:13px">100 prefixes • small-world graph</div>
+      </div>
+      <div id="vis" style="position:relative;height:calc(100% - 72px);">
+        <svg id="svg"></svg>
+        <div id="tooltip" class="tooltip" style="display:none"></div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <aside class="side">
+      <h3>Prefix details</h3>
+      <div id="errorBox" class="meta" style="display:none"></div>
+      <div class="meta">Click any node to pin the prefix and see its meaning here.</div>
+      <div id="prefixName" class="prefix-badge">—</div>
+      <div id="prefixMeaning" class="meaning">Select a node to see the meaning.</div>
+      <div style="height:12px"></div>
+      <div class="footer">Hover for quick info. Drag nodes to explore. Zoom with mousewheel/pinch.</div>
+    </aside>
+  </div>
+
+  <!-- Try to load D3 from CDN; if unavailable, show a helpful error instead of failing with an obscure syntax error -->
+  <script>
+    (function(){
+      function onError(msg){
+        const eb = document.getElementById('errorBox');
+        eb.style.display = 'block';
+        eb.className = 'error';
+        eb.textContent = msg;
+      }
+
+      // Minimal check: ensure d3 is available, otherwise attempt to load it dynamically
+      if(typeof window.d3 === 'undefined'){
+        // create script tag and attach listeners
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js';
+        s.crossOrigin = 'anonymous';
+        s.onload = ()=>{ initGraph(); };
+        s.onerror = ()=>{
+          onError('Failed to load D3 from CDN. The environment may block external resources. Please enable network access or run this file on a machine with internet access.');
+        };
+        document.head.appendChild(s);
+      } else {
+        initGraph();
+      }
+
+      function initGraph(){
+        // ensure d3 is defined
+        if(typeof window.d3 === 'undefined'){
+          return;
+        }
+
+        // --- DATA: 100 prefixes with meaning and category ---
+        const prefixes = [
+          {p:'a-',m:'not, without',c:'Negation'},
+          {p:'ab-',m:'away from',c:'Position'},
+          {p:'ad-',m:'to, toward',c:'Direction'},
+          {p:'ante-',m:'before',c:'Time'},
+          {p:'anti-',m:'against, opposing',c:'Negation'},
+          {p:'apo-',m:'away from',c:'Position'},
+          {p:'auto-',m:'self',c:'Relation'},
+          {p:'bi-',m:'two',c:'Number', g: 'biology'},
+          {p:'bene-',m:'good, well',c:'Quality'},
+          {p:'bio-',m:'life',c:'Field'},
+          {p:'circum-',m:'around',c:'Position'},
+          {p:'co-',m:'with, together',c:'Relation'},
+          {p:'col-',m:'with (before l)',c:'Relation'},
+          {p:'com-',m:'with, together',c:'Relation'},
+          {p:'con-',m:'with, together',c:'Relation'},
+          {p:'contra-',m:'against',c:'Opposite'},
+          {p:'counter-',m:'against, opposite',c:'Opposite'},
+          {p:'de-',m:'down, remove, reverse',c:'Negation'},
+          {p:'demi-',m:'half',c:'Quantity'},
+          {p:'dia-',m:'through, across',c:'Direction'},
+          {p:'dis-',m:'not, opposite of',c:'Negation'},
+          {p:'dys-',m:'bad, difficult',c:'Quality'},
+          {p:'em-',m:'in, into (before b/m/p)',c:'Position'},
+          {p:'en-',m:'in, into',c:'Position'},
+          {p:'epi-',m:'upon, on',c:'Position'},
+          {p:'eu-',m:'good, well',c:'Quality'},
+          {p:'ex-',m:'out of, former',c:'Position'},
+          {p:'extra-',m:'beyond, outside',c:'Extent'},
+          {p:'fore-',m:'before',c:'Time'},
+          {p:'geo-',m:'earth',c:'Field'},
+          {p:'hetero-',m:'different',c:'Relation'},
+          {p:'homo-',m:'same',c:'Relation'},
+          {p:'hyper-',m:'over, excessive',c:'Degree'},
+          {p:'hypo-',m:'under, below',c:'Degree'},
+          {p:'il-',m:'not (before l)',c:'Negation'},
+          {p:'im-',m:'not / into (before b/p/m)',c:'Negation'},
+          {p:'in-',m:'not / into',c:'Negation'},
+          {p:'infra-',m:'below',c:'Position'},
+          {p:'inter-',m:'between, among',c:'Relation'},
+          {p:'intra-',m:'within',c:'Position'},
+          {p:'iso-',m:'equal, same',c:'Quality'},
+          {p:'mal-',m:'bad, ill',c:'Quality'},
+          {p:'mega-',m:'large, million',c:'Quantity'},
+          {p:'meta-',m:'after, beyond, change',c:'Change'},
+          {p:'micro-',m:'small',c:'Size'},
+          {p:'mid-',m:'middle',c:'Position'},
+          {p:'milli-',m:'thousandth',c:'Quantity'},
+          {p:'mini-',m:'small',c:'Size'},
+          {p:'mis-',m:'wrong, wrongly',c:'Quality'},
+          {p:'mono-',m:'one',c:'Number'},
+          {p:'multi-',m:'many',c:'Number'},
+          {p:'neo-',m:'new',c:'Time'},
+          {p:'non-',m:'not',c:'Negation'},
+          {p:'octa-',m:'eight',c:'Number'},
+          {p:'omni-',m:'all',c:'Extent'},
+          {p:'out-',m:'outside, beyond',c:'Position'},
+          {p:'over-',m:'excessive, above',c:'Degree'},
+          {p:'para-',m:'beside, near',c:'Relation'},
+          {p:'penta-',m:'five',c:'Number'},
+          {p:'peri-',m:'around',c:'Position'},
+          {p:'poly-',m:'many',c:'Number'},
+          {p:'post-',m:'after',c:'Time'},
+          {p:'pre-',m:'before',c:'Time'},
+          {p:'pro-',m:'for, forward',c:'Direction'},
+          {p:'proto-',m:'first, primitive',c:'Order'},
+          {p:'pseudo-',m:'false',c:'Quality'},
+          {p:'quadri-',m:'four',c:'Number'},
+          {p:'re-',m:'again, back',c:'Repeat'},
+          {p:'retro-',m:'backward',c:'Direction'},
+          {p:'semi-',m:'half',c:'Quantity'},
+          {p:'sub-',m:'under, below',c:'Position'},
+          {p:'super-',m:'above, over',c:'Degree'},
+          {p:'syn-',m:'with, together',c:'Relation'},
+          {p:'tele-',m:'far, at a distance',c:'Distance'},
+          {p:'trans-',m:'across, through',c:'Direction'},
+          {p:'tri-',m:'three',c:'Number'},
+          {p:'ultra-',m:'beyond, extreme',c:'Degree'},
+          {p:'un-',m:'not',c:'Negation'},
+          {p:'uni-',m:'one',c:'Number'},
+          {p:'vice-',m:'in place of',c:'Relation'},
+          {p:'with-',m:"(Old English) against, back",c:'Opposite'},
+          {p:'zygo-',m:'yoked, paired',c:'Relation'},
+          {p:'kilo-',m:'thousand',c:'Quantity'},
+          {p:'giga-',m:'billion',c:'Quantity'},
+          {p:'tera-',m:'trillion',c:'Quantity'},
+          {p:'hecto-',m:'hundred',c:'Number'},
+          {p:'deca-',m:'ten',c:'Number'},
+          {p:'cata-',m:'down, against',c:'Direction'},
+          {p:'ana-',m:'up, back, again',c:'Direction'},
+          {p:'arch-',m:'chief, principal',c:'Quality'},
+          {p:'bathy-',m:'deep',c:'Depth'},
+          {p:'caco-',m:'bad',c:'Quality'},
+          {p:'cryo-',m:'cold',c:'Condition'},
+          {p:'ethno-',m:'people, nation',c:'Field'},
+          {p:'gastro-',m:'stomach',c:'Field'},
+          {p:'hydro-',m:'water',c:'Field'},
+          {p:'leuko-',m:'white',c:'Appearance'},
+          {p:'melano-',m:'black, dark',c:'Appearance'},
+          {p:'psycho-',m:'mind',c:'Field'},
+          {p:'socio-',m:'society',c:'Field'}
+        ];
+
+        // --- categories and colors ---
+        const categories = Array.from(new Set(prefixes.map(d=>d.c))).sort();
+        const palette = (d3.schemeTableau10 || []).concat(d3.schemeSet3 || []);
+        const color = d3.scaleOrdinal().domain(categories).range(palette);
+
+        // Build legend
+        const legendEl = d3.select('#legend');
+        legendEl.selectAll('*').remove();
+        categories.forEach(cat=>{
+          const item = legendEl.append('div').attr('class','legend-item');
+          item.append('div').attr('class','dot').style('background',color(cat));
+          item.append('div').text(cat).style('font-size','13px');
+        });
+
+        // --- build small-world edges (Watts-Strogatz-like) ---
+        function makeWattsStrogatz(n,k,p){
+          if(k%2!==0) k++;
+          const edges = [];
+          for(let i=0;i<n;i++){
+            for(let j=1;j<=k/2;j++){
+              const targ=(i+j)%n;
+              edges.push({source:i,target:targ});
+            }
+          }
+          for(let i=0;i<n;i++){
+            for(let j=1;j<=k/2;j++){
+              if(Math.random()<p){
+                const a=i;
+                let b=Math.floor(Math.random()*n);
+                while(b===a) b=Math.floor(Math.random()*n);
+                const oldT=(i+j)%n;
+                for(let idx=0;idx<edges.length;idx++){
+                  const e=edges[idx];
+                  if((e.source===i && e.target===oldT) || (e.source===oldT && e.target===i)){
+                    edges.splice(idx,1);break;
+                  }
+                }
+                edges.push({source:a,target:b});
+              }
+            }
+          }
+          return edges.map(e=>({source:prefixes[e.source].p,target:prefixes[e.target].p}));
+        }
+
+        // SVG and simulation helpers
+        const svg = d3.select('#svg');
+        function getWH(){
+          const node = svg.node();
+          return {w: node.clientWidth || node.parentNode.clientWidth || 800, h: node.clientHeight || node.parentNode.clientHeight || 600};
+        }
+
+        let nodeSize = +document.getElementById('nodesize').value;
+
+        function render(rewireP=0.1){
+          svg.selectAll('*').remove();
+          const {w:width, h:height} = getWH();
+          const n = prefixes.length;
+          const edges = makeWattsStrogatz(n,4,rewireP);
+          const nodes = prefixes.map(d=>({id:d.p,meaning:d.m,category:d.c}));
+
+          // convert edge endpoints from id strings to node objects automatically via d3.forceLink id accessor
+          const link = svg.append('g').attr('stroke','rgba(255,255,255,0.06)').selectAll('line').data(edges).join('line');
+
+          const label = svg.append('g').selectAll('text').data(nodes).join('text')
+            .text(d=>d.id)
+            .attr('font-size',10)
+            .attr('fill','#cfe9ff')
+            .attr('opacity',0)
+            .attr('pointer-events','none');
+
+          // create simulation first
+          const simulation = d3.forceSimulation(nodes)
+            .force('link', d3.forceLink(edges).id(d=>d.id).distance(70).strength(0.6))
+            .force('charge', d3.forceManyBody().strength(-80))
+            .force('center', d3.forceCenter(width/2, height/2))
+            .force('collision', d3.forceCollide().radius(nodeSize*2.2));
+
+          // nodes after simulation exists so drag handlers can reference simulation
+          const node = svg.append('g').selectAll('circle').data(nodes).join('circle')
+            .attr('r',nodeSize)
+            .attr('fill',d=>color(d.category))
+            .attr('stroke','#061b27')
+            .attr('stroke-width',1.2)
+            .call(d3.drag()
+              .on('start', (event,d)=>{ if(!event.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+              .on('drag', (event,d)=>{ d.fx = event.x; d.fy = event.y; })
+              .on('end', (event,d)=>{ if(!event.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; })
+            );
+
+          // tooltip & click panel
+          const tooltip = d3.select('#tooltip');
+
+          node.on('mouseover', function(event,d){
+            tooltip.style('display','block').html(`<strong>${d.id}</strong><div style="font-size:12px;color:#9fb7c9">${d.meaning}</div>`);
+            d3.select(this).attr('r', nodeSize*1.6);
+            // show label too
+            label.filter(l=>l.id===d.id).attr('opacity',1);
+          }).on('mousemove', function(event){
+            tooltip.style('left',(event.pageX+12)+'px').style('top',(event.pageY+12)+'px');
+          }).on('mouseout', function(event,d){
+            tooltip.style('display','none');
+            d3.select(this).attr('r', nodeSize);
+            label.filter(l=>l.id===d.id).attr('opacity',0);
+          }).on('click',(event,d)=>{ setPanel(d); });
+
+          // zoom — transform group container rather than all groups individually
+          const container = svg.append('g');
+          // Move existing groups into container (links, nodes, labels)
+          // We'll recreate link/node under container for simpler zoom transforms
+          container.node().appendChild(link.node());
+          container.node().appendChild(node.node());
+          container.node().appendChild(label.node());
+
+          svg.call(d3.zoom().on('zoom', (e)=>{ container.attr('transform', e.transform); }));
+
+          simulation.on('tick', ()=>{
+            link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+            node.attr('cx',d=>d.x).attr('cy',d=>d.y);
+            label.attr('x',d=>d.x+nodeSize+2).attr('y',d=>d.y+4);
+          });
+
+          function setPanel(d){
+            d3.select('#prefixName').text(d.id).style('background',color(d.category)).style('color','#02121a');
+            d3.select('#prefixMeaning').html(`<div><strong>Meaning:</strong> ${d.meaning}</div><div style="margin-top:8px;color:var(--muted)"><strong>Category:</strong> ${d.category}</div>`);
+          }
+
+          // center view
+          svg.call(d3.zoom().transform, d3.zoomIdentity.translate(0,0).scale(1));
+
+          return {simulation,node,link};
+        }
+
+        // initial render
+        let state = render(+document.getElementById('rewire').value);
+
+        document.getElementById('rewire').addEventListener('input', ()=>{ state = render(+document.getElementById('rewire').value); });
+        document.getElementById('restart').addEventListener('click', ()=>{ state = render(+document.getElementById('rewire').value); });
+        document.getElementById('nodesize').addEventListener('input', (e)=>{ nodeSize=+e.target.value; state = render(+document.getElementById('rewire').value); });
+
+        window.addEventListener('resize', ()=>{ state = render(+document.getElementById('rewire').value); });
+      }
+
+    })();
+  </script>
+<script>
+// Minimal D3-force fallback if CDN blocked
+(function(){
+  if (window.d3) return;
+  function ForceSim(nodes){ this.nodes=nodes; this.alpha=1; this.tickFn=null; }
+  ForceSim.prototype.on=function(ev,fn){ this.tickFn=fn; return this; };
+  ForceSim.prototype.tick=function(){
+    this.nodes.forEach(n=>{ n.x += (Math.random()-0.5)*2; n.y += (Math.random()-0.5)*2; });
+    if(this.tickFn) this.tickFn();
+  };
+  window.d3={ forceSimulation:(n)=>new ForceSim(n) };
+})();
+</script>
+</body>
+</html>
+

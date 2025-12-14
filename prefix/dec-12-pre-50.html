@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prefix Categories Graph using jsTree</title>
+
+    <!-- jsTree CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jstree@3.3.12/dist/themes/default/style.min.css" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        #tree {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Prefix Categories and Prefixes</h1>
+    
+    <!-- jsTree Container -->
+    <div id="tree"></div>
+
+    <!-- jQuery and jsTree Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jstree@3.3.12/dist/jstree.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Prefix data in JSON format for jsTree
+            var prefixData = [
+                {
+                    "text": "Negation",
+                    "children": [
+                        { "text": "un-" },
+                        { "text": "in-" },
+                        { "text": "im-" },
+                        { "text": "dis-" },
+                        { "text": "non-" }
+                    ]
+                },
+                {
+                    "text": "Quantity",
+                    "children": [
+                        { "text": "bi-" },
+                        { "text": "mono-" },
+                        { "text": "poly-" },
+                        { "text": "multi-" },
+                        { "text": "duo-" },
+                        { "text": "tri-" },
+                        { "text": "quad-" },
+                        { "text": "centi-" },
+                        { "text": "milli-" },
+                        { "text": "kilo-" },
+                        { "text": "mega-" },
+                        { "text": "giga-" }
+                    ]
+                },
+                {
+                    "text": "Size/degree",
+                    "children": [
+                        { "text": "micro-" },
+                        { "text": "nano-" },
+                        { "text": "pico-" },
+                        { "text": "giga-" },
+                        { "text": "mega-" },
+                        { "text": "centi-" },
+                        { "text": "milli-" }
+                    ]
+                },
+                {
+                    "text": "Time",
+                    "children": [
+                        { "text": "pre-" },
+                        { "text": "post-" },
+                        { "text": "sub-" },
+                        { "text": "inter-" },
+                        { "text": "ante-" }
+                    ]
+                },
+                {
+                    "text": "Direction",
+                    "children": [
+                        { "text": "re-" },
+                        { "text": "anti-" },
+                        { "text": "auto-" },
+                        { "text": "counter-" },
+                        { "text": "co-" }
+                    ]
+                },
+                {
+                    "text": "Other",
+                    "children": [
+                        { "text": "anti-" },
+                        { "text": "auto-" },
+                        { "text": "trans-" },
+                        { "text": "extra-" },
+                        { "text": "hyper-" },
+                        { "text": "super-" },
+                        { "text": "under-" },
+                        { "text": "over-" },
+                        { "text": "sub-" },
+                        { "text": "inter-" },
+                        { "text": "intra-" },
+                        { "text": "ex-" },
+                        { "text": "mis-" }
+                    ]
+                }
+            ];
+
+            // Initialize jsTree with the prefix data
+            $('#tree').jstree({
+                'core': {
+                    'data': prefixData
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
+

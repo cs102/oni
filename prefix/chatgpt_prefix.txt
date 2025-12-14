@@ -1,0 +1,9 @@
+From each category bubble, draw branching lines to its prefixes (also in small hand-drawn bubbles):
+Negation: un-, in-/im-/ir-/il-, non-, dis-, a-/an-
+Direction: pre-, post-, sub-, super-/supra-, inter-, trans-
+Repetition: re-, multi-
+Time: pre-, post-, chrono-
+Quantity: mono-/uni-, bi-/di-, tri-, poly-, micro-, macro-
+Degree: over-, under-, hyper-, hypo-
+Numbers: mono-, uni-, bi-, di-, tri-, quadri-/tetra-
+Relation: co-/com-/con-, syn-/sym-, anti-, pro-

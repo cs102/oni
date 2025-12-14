@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prefix Categories Graph</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .tree {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        .category {
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .prefix {
+            padding-left: 20px;
+            display: none;
+        }
+        .category:hover {
+            color: #007BFF;
+        }
+        .tree ul {
+            display: none;
+            padding-left: 20px;
+        }
+        .tree > li > ul {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Prefix Categories and Prefixes</h1>
+    
+    <ul class="tree">
+        <li>
+            <span class="category" onclick="toggleTree(this)">Negation</span>
+            <ul class="prefix">
+                <li>un-</li>
+                <li>in-</li>
+                <li>im-</li>
+                <li>dis-</li>
+                <li>non-</li>
+            </ul>
+        </li>
+        <li>
+            <span class="category" onclick="toggleTree(this)">Quantity</span>
+            <ul class="prefix">
+                <li>bi-</li>
+                <li>mono-</li>
+                <li>poly-</li>
+                <li>multi-</li>
+            </ul>
+        </li>
+        <li>
+            <span class="category" onclick="toggleTree(this)">Size/degree</span>
+            <ul class="prefix">
+                <li>micro-</li>
+                <li>mega-</li>
+                <li>giga-</li>
+            </ul>
+        </li>
+        <li>
+            <span class="category" onclick="toggleTree(this)">Time</span>
+            <ul class="prefix">
+                <li>pre-</li>
+                <li>post-</li>
+                <li>sub-</li>
+            </ul>
+        </li>
+        <li>
+            <span class="category" onclick="toggleTree(this)">Direction</span>
+            <ul class="prefix">
+                <li>re-</li>
+                <li>anti-</li>
+                <li>auto-</li>
+            </ul>
+        </li>
+    </ul>
+
+    <script>
+        function toggleTree(element) {
+            const childList = element.nextElementSibling;
+            if (childList.style.display === "none" || childList.style.display === "") {
+                childList.style.display = "block";
+            } else {
+                childList.style.display = "none";
+            }
+        }
+    </script>
+
+</body>
+</html>
+
