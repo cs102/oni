@@ -1,0 +1,30 @@
+Warning: The post-install step did not complete successfully
+You can try again using:
+  brew postinstall postgresql@14
+Warning: Removed Sorbet lines from backtrace!
+Rerun with `--verbose` to see the original backtrace
+==> Caveats
+This formula has created a default database cluster with:
+  initdb --locale=en_US.UTF-8 -E UTF-8 /usr/local/var/postgresql@14
+
+To restart postgresql@14 after an upgrade:
+  brew services restart postgresql@14
+Or, if you don't want/need a background service you can just run:
+  /usr/local/opt/postgresql@14/bin/postgres -D /usr/local/var/postgresql@14
+==> Summary
+🍺  /usr/local/Cellar/postgresql@14/14.20: 3,335 files, 47.3MB, built in 7 minutes 26 seconds
+==> Running `brew cleanup postgresql@14`...
+Disable this behaviour by setting `HOMEBREW_NO_INSTALL_CLEANUP=1`.
+Hide these hints with `HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).
+Removing: /usr/local/Cellar/postgresql@14/14.17_1... (3,330 files, 47.2MB)
+==> Caveats
+==> postgresql@14
+This formula has created a default database cluster with:
+  initdb --locale=en_US.UTF-8 -E UTF-8 /usr/local/var/postgresql@14
+
+To restart postgresql@14 after an upgrade:
+  brew services restart postgresql@14
+Or, if you don't want/need a background service you can just run:
+  /usr/local/opt/postgresql@14/bin/postgres -D /usr/local/var/postgresql@14
+(oni) ?1 lab                                                                                       main
+

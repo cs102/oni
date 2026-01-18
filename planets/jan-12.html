@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Solar System</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="solarSystem"></canvas>
+
+<script>
+  const canvas = document.getElementById("solarSystem");
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+
+  // Utility function
+  function drawCircle(x, y, radius, color) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  // Planet class
+  class Planet {
+    constructor(radius, orbitRadius, speed, color, moons = []) {
+      this.radius = radius;
+      this.orbitRadius = orbitRadius;
+      this.speed = speed;
+      this.color = color;
+      this.angle = Math.random() * Math.PI * 2;
+      this.moons = moons;
+    }
+
+    update() {
+      this.angle += this.speed;
+    }
+
+    draw() {
+      const x = centerX + Math.cos(this.angle) * this.orbitRadius;
+      const y = centerY + Math.sin(this.angle) * this.orbitRadius;
+
+      // Draw orbit
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, this.orbitRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(255,255,255,0.1)";
+      ctx.stroke();
+
+      // Draw planet
+      drawCircle(x, y, this.radius, this.color);
+
+      // Draw moons
+      this.moons.forEach(moon => {
+        moon.update();
+        moon.draw(x, y);
+      });
+    }
+  }
+
+  // Moon class
+  class Moon {
+    constructor(radius, orbitRadius, speed, color) {
+      this.radius = radius;
+      this.orbitRadius = orbitRadius;
+      this.speed = speed;
+      this.color = color;
+      this.angle = Math.random() * Math.PI * 2;
+    }
+
+    update() {
+      this.angle += this.speed;
+    }
+
+    draw(px, py) {
+      const x = px + Math.cos(this.angle) * this.orbitRadius;
+      const y = py + Math.sin(this.angle) * this.orbitRadius;
+      drawCircle(x, y, this.radius, this.color);
+    }
+  }
+
+  // Create planets
+  const planets = [
+    new Planet(8, 80, 0.02, "gray"),
+    new Planet(10, 130, 0.015, "orange"),
+    new Planet(12, 190, 0.01, "blue", [
+      new Moon(4, 20, 0.05, "white")
+    ]),
+    new Planet(10, 260, 0.008, "red", [
+      new Moon(3, 18, 0.06, "white"),
+      new Moon(2, 28, 0.04, "lightgray")
+    ])
+  ];
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Sun
+    drawCircle(centerX, centerY, 25, "yellow");
+
+    planets.forEach(planet => {
+      planet.update();
+      planet.draw();
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+
+  // Resize handling
+  window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
+</script>
+
+</body>
+</html>
+

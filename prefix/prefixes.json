@@ -1,0 +1,90 @@
+{
+  "prefixes": {
+    "negative": [
+      {
+        "prefix": "un-",
+        "definition": "not, opposite of",
+        "examples": ["unhappy", "undo", "unfair", "untidy", "unlucky"]
+      },
+      {
+        "prefix": "in-",
+        "definition": "not, opposite of",
+        "examples": ["incomplete", "inactive", "incorrect", "invisible", "insensitive"]
+      },
+      {
+        "prefix": "dis-",
+        "definition": "not, opposite of, reverse",
+        "examples": ["disagree", "disconnect", "dislike", "disapprove", "disappear"]
+      }
+    ],
+    "time_related": [
+      {
+        "prefix": "pre-",
+        "definition": "before",
+        "examples": ["prehistory", "prepare", "preview", "predict", "preemptive"]
+      },
+      {
+        "prefix": "post-",
+        "definition": "after",
+        "examples": ["postpone", "postwar", "postscript", "postgraduate", "posthumous"]
+      },
+      {
+        "prefix": "re-",
+        "definition": "again, back",
+        "examples": ["return", "rebuild", "redo", "revisit", "rethink"]
+      }
+    ],
+    "size_quantity": [
+      {
+        "prefix": "hyper-",
+        "definition": "excessive, over",
+        "examples": ["hyperactive", "hypertension", "hyperbole", "hyperlink", "hyperventilate"]
+      },
+      {
+        "prefix": "micro-",
+        "definition": "small",
+        "examples": ["microphone", "microscope", "microsecond", "microbe", "micromanager"]
+      },
+      {
+        "prefix": "multi-",
+        "definition": "many",
+        "examples": ["multitask", "multicultural", "multiply", "multipurpose", "multinational"]
+      }
+    ],
+    "degree_manner": [
+      {
+        "prefix": "sub-",
+        "definition": "under, below",
+        "examples": ["submarine", "subterranean", "substandard", "submerge", "subtle"]
+      },
+      {
+        "prefix": "super-",
+        "definition": "above, beyond",
+        "examples": ["superstar", "superpower", "superficial", "superhuman", "superb"]
+      },
+      {
+        "prefix": "over-",
+        "definition": "excessive, too much",
+        "examples": ["overwork", "overeat", "overlook", "overwhelm", "overconfidence"]
+      }
+    ],
+    "place_location": [
+      {
+        "prefix": "inter-",
+        "definition": "between, among",
+        "examples": ["international", "interact", "intermediate", "intercept", "intervene"]
+      },
+      {
+        "prefix": "trans-",
+        "definition": "across, beyond",
+        "examples": ["transport", "transmit", "translate", "transformation", "transcontinental"]
+      },
+      {
+        "prefix": "epi-",
+        "definition": "upon, over",
+        "examples": ["epicenter", "epidermis", "epilogue", "epiphany", "epic"]
+      }
+    ]
+  }
+}
+

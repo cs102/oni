@@ -1,0 +1,2 @@
+hugo version
+hugo new site site-name

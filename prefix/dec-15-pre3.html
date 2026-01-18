@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>English Prefix Force Network</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f9;
+    margin: 0;
+  }
+  h1 {
+    text-align: center;
+    padding: 10px;
+  }
+  svg {
+    width: 100vw;
+    height: 90vh;
+  }
+  .node text {
+    font-size: 11px;
+    pointer-events: none;
+    fill: #333;
+  }
+</style>
+</head>
+<body>
+
+<h1>Force-Directed Network of English Prefixes</h1>
+<svg></svg>
+
+<script>
+/* =========================
+   JSON DATA
+   ========================= */
+const prefixData = {
+  negative: [
+    { prefix: "un-", definition: "not, opposite of", examples: ["unhappy","undo","unfair","untidy","unlucky"] },
+    { prefix: "in-", definition: "not, opposite of", examples: ["incomplete","inactive","incorrect","invisible","insensitive"] },
+    { prefix: "dis-", definition: "not, opposite of, reverse", examples: ["disagree","disconnect","dislike","disapprove","disappear"] }
+  ],
+  time_related: [
+    { prefix: "pre-", definition: "before", examples: ["prehistory","prepare","preview","predict","preemptive"] },
+    { prefix: "post-", definition: "after", examples: ["postpone","postwar","postscript","postgraduate","posthumous"] },
+    { prefix: "re-", definition: "again, back", examples: ["return","rebuild","redo","revisit","rethink"] }
+  ],
+  size_quantity: [
+    { prefix: "hyper-", definition: "excessive", examples: ["hyperactive","hypertension","hyperbole","hyperlink","hyperventilate"] },
+    { prefix: "micro-", definition: "small", examples: ["microphone","microscope","microsecond","microbe","micromanager"] },
+    { prefix: "multi-", definition: "many", examples: ["multitask","multicultural","multiply","multipurpose","multinational"] }
+  ],
+  degree_manner: [
+    { prefix: "sub-", definition: "under", examples: ["submarine","subterranean","substandard","submerge","subtle"] },
+    { prefix: "super-", definition: "above", examples: ["superstar","superpower","superficial","superhuman","superb"] },
+    { prefix: "over-", definition: "too much", examples: ["overwork","overeat","overlook","overwhelm","overconfidence"] }
+  ],
+  place_location: [
+    { prefix: "inter-", definition: "between", examples: ["international","interact","intermediate","intercept","intervene"] },
+    { prefix: "trans-", definition: "across", examples: ["transport","transmit","translate","transformation","transcontinental"] },
+    { prefix: "epi-", definition: "upon", examples: ["epicenter","epidermis","epilogue","epiphany","epic"] }
+  ]
+};
+
+/* =========================
+   BUILD NODES & LINKS
+   ========================= */
+const nodes = [];
+const links = [];
+
+for (const category in prefixData) {
+  nodes.push({ id: category, type: "category" });
+
+  prefixData[category].forEach(p => {
+    nodes.push({ id: p.prefix, type: "prefix" });
+    links.push({ source: category, target: p.prefix });
+
+    p.examples.forEach(word => {
+      nodes.push({ id: word, type: "example" });
+      links.push({ source: p.prefix, target: word });
+    });
+  });
+}
+
+/* =========================
+   D3 FORCE GRAPH
+   ========================= */
+const svg = d3.select("svg");
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+const color = d3.scaleOrdinal()
+  .domain(["category","prefix","example"])
+  .range(["#4e73df","#1cc88a","#f6c23e"]);
+
+const simulation = d3.forceSimulation(nodes)
+  .force("link", d3.forceLink(links).id(d => d.id).distance(70))
+  .force("charge", d3.forceManyBody
+

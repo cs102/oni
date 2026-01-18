@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>English Prefixes Graph</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+    canvas {
+      margin-top: 30px;
+    }
+    pre {
+      background: #fff;
+      padding: 15px;
+      overflow-x: auto;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>English Prefixes by Category</h1>
+
+  <!-- Chart -->
+  <canvas id="prefixChart"></canvas>
+
+  <h2>Raw JSON Data</h2>
+  <pre id="jsonDisplay"></pre>
+</div>
+
+<script>
+/* =========================
+   JSON DATA (embedded)
+   ========================= */
+const prefixData = {
+  "negative": [
+    {
+      "prefix": "un-",
+      "definition": "not, opposite of",
+      "examples": ["unhappy", "undo", "unfair", "untidy", "unlucky"]
+    },
+    {
+      "prefix": "in-",
+      "definition": "not, opposite of",
+      "examples": ["incomplete", "inactive", "incorrect", "invisible", "insensitive"]
+    },
+    {
+      "prefix": "dis-",
+      "definition": "not, opposite of, reverse",
+      "examples": ["disagree", "disconnect", "dislike", "disapprove", "disappear"]
+    }
+  ],
+  "time_related": [
+    {
+      "prefix": "pre-",
+      "definition": "before",
+      "examples": ["prehistory", "prepare", "preview", "predict", "preemptive"]
+    },
+    {
+      "prefix": "post-",
+      "definition": "after",
+      "examples": ["postpone", "postwar", "postscript", "postgraduate", "posthumous"]
+    },
+    {
+      "prefix": "re-",
+      "definition": "again, back",
+      "examples": ["return", "rebuild", "redo", "revisit", "rethink"]
+    }
+  ],
+  "size_quantity": [
+    {
+      "prefix": "hyper-",
+      "definition": "excessive, over",
+      "examples": ["hyperactive", "hypertension", "hyperbole", "hyperlink", "hyperventilate"]
+    },
+    {
+      "prefix": "micro-",
+      "definition": "small",
+      "examples": ["microphone", "microscope", "microsecond", "microbe", "micromanager"]
+    },
+    {
+      "prefix": "multi-",
+      "definition": "many",
+      "examples": ["multitask", "multicultural", "multiply", "multipurpose", "multinational"]
+    }
+  ],
+  "degree_manner": [
+    {
+      "prefix": "sub-",
+      "definition": "under, below",
+      "examples": ["submarine", "subterranean", "substandard", "submerge", "subtle"]
+    },
+    {
+      "prefix": "super-",
+      "definition": "above, beyond",
+      "examples": ["superstar", "superpower", "superficial", "superhuman", "superb"]
+    },
+    {
+      "prefix": "over-",
+      "definition": "excessive, too much",
+      "examples": ["overwork", "overeat", "overlook", "overwhelm", "overconfidence"]
+    }
+  ],
+  "place_location": [
+    {
+      "prefix": "inter-",
+      "definition": "between, among",
+      "examples": ["international", "interact", "intermediate", "intercept", "intervene"]
+    },
+    {
+      "prefix": "trans-",
+      "definition": "across, beyond",
+      "examples": ["transport", "transmit", "translate", "transformation", "transcontinental"]
+    },
+    {
+      "prefix": "epi-",
+      "definition": "upon, over",
+      "examples": ["epicenter", "epidermis", "epilogue", "epiphany", "epic"]
+    }
+  ]
+};
+
+/* =========================
+   DISPLAY JSON
+   ========================= */
+document.getElementById("jsonDisplay").textContent =
+  JSON.stringify(prefixData, null, 2);
+
+/* =========================
+   BUILD GRAPH FROM JSON
+   ========================= */
+const categories = Object.keys(prefixData);
+const counts = categories.map(cat => prefixData[cat].length);
+
+const ctx = document.getElementById("prefixChart").getContext("2d");
+
+new Chart(ctx, {
+  type: "bar",
+  data: {
+    labels: categories,
+    datasets: [{
+      label: "Number of Prefixes",
+      data: counts,
+      backgroundColor: [
+        "#4e73df",
+        "#1cc88a",
+        "#36b9cc",
+        "#f6c23e",
+        "#e74a3b"
+      ]
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { stepSize: 1 }
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
+

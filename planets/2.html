@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Solar System with Sun at Center</title>
+<style>
+  body {
+    background-color: black;
+    overflow-x: hidden;
+    font-family: Arial, sans-serif;
+    color: white;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  /* Container for solar system */
+  .solar-system {
+    border:1px solid white;
+    position: relative;
+    width: 100%;
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Sun at the center */
+  .sun {
+    width: 80px;
+    height: 80px;
+    background-color: yellow;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 20px 5px yellow;
+    z-index: 2;
+  }
+
+  /* Orbit paths */
+  .orbit {
+    border: 1px solid pink;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border: 1px dashed rgba(255,255,255,0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Planet styles and orbital animation */
+  .planet {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: calc(100%);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  /* Specific durations for each orbit to simulate different orbital speeds */
+  .mercury {
+    --orbit-radius: 100px;
+    animation: rotate 8s linear infinite;
+  }
+
+  .venus {
+    --orbit-radius: 150px;
+    animation: rotate 12s linear infinite;
+  }
+
+  .earth {
+    --orbit-radius: 200px;
+    animation: rotate 20s linear infinite;
+  }
+
+  .mars {
+    --orbit-radius: 250px;
+    animation: rotate 24s linear infinite;
+  }
+
+  .jupiter {
+    --orbit-radius: 300px;
+    animation: rotate 45s linear infinite;
+  }
+
+  .saturn {
+    --orbit-radius: 350px;
+    animation: rotate 50s linear infinite;
+  }
+
+  .uranus {
+    --orbit-radius: 400px;
+    animation: rotate 60s linear infinite;
+  }
+
+  .neptune {
+    --orbit-radius: 450px;
+    animation: rotate 70s linear infinite;
+  }
+
+  /* Common rotation animation for planets */
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Sun's planet orbit: position planet on orbit radius */
+  .planet {
+    width: 20px;
+    height: 20px;
+    background-color: inherit;
+    border-radius: 50%;
+    margin-left: var(--orbit-radius);
+  }
+
+  /* Colors for planets */
+  .mercury { background-color: #a9a9a9; }
+  .venus { background-color: #c67171; }
+  .earth { background-color: #1e90ff; }
+  .mars { background-color: #ff4500; }
+  .jupiter { background-color: #daa520; width: 30px; height: 30px; }
+  .saturn { background-color: #deb887; width: 28px; height: 28px; }
+  .uranus { background-color: #87cefa; width: 24px; height: 24px; }
+  .neptune { background-color: #4169e1; width: 24px; height: 24px; }
+
+  /* Moons */
+  .moon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    background-color: #d3d3d3;
+    border-radius: 50%;
+    transform-origin: calc(100% + 20px);
+  }
+
+  /* Moons positioning and orbit animation */
+  .moon1 { 
+    --moon-radius: 20px; 
+    animation: moonOrbit 4s linear infinite; 
+  }
+
+  .moon2 { 
+    --moon-radius: 25px; 
+    animation: moonOrbit 6s linear infinite; 
+  }
+
+  @keyframes moonOrbit {
+    from { transform: rotate(0deg) translateX(var(--moon-radius)); }
+    to { transform: rotate(360deg) translateX(var(--moon-radius)); }
+  }
+
+  /* Labels for planets and moons */
+  .label {
+    font-size: 12px;
+    margin-top: 5px;
+    text-align: center;
+  }
+
+</style>
+</head>
+<body>
+<h1 style="text-align:center;">Solar System with Sun at Center</h1>
+<div class="solar-system">
+  <!-- Sun -->
+  <div class="sun"></div>
+
+  <!-- Mercury -->
+  <div class="planet mercury" style="animation-duration: 8s;">
+    <div class="moon moon1">
+      <div class="label" style="font-size:8px;">Mercury M1</div>
+    </div>
+    <div class="label">Mercury</div>
+  </div>
+
+  <!-- Venus -->
+  <div class="planet venus" style="animation-duration: 12s;">
+    <div class="label">Venus</div>
+  </div>
+
+  <!-- Earth with Moons -->
+  <div class="planet earth" style="animation-duration: 20s;">
+    <!-- Earth's First Moon -->
+    <div class="moon moon1">
+      <div class="label" style="font-size:8px;">Moon</div>
+    </div>
+   <div class="label">Earth</div>
+  </div>
+
+  <!-- Mars with Moons -->
+  <div class="planet mars" style="animation-duration: 24s;">
+    <div class="moon moon1" style="--moon-radius: 15px; animation-duration: 4s;">
+      <div class="label" style="font-size:8px;">Deimos</div>
+    </div>
+    <div class="moon moon2" style="--moon-radius: 18px; animation-duration: 6s;">
+      <div class="label" style="font-size:8px;">Phobos</div>
+    </div>
+    <div class="label">Mars</div>
+  </div>
+
+  <!-- Jupiter -->
+  <div class="planet jupiter" style="animation-duration: 45s;">
+    <div class="label">Jupiter</div>
+  </div>
+
+  <!-- Saturn -->
+  <div class="planet saturn" style="animation-duration: 50s;">
+    <div class="label">Saturn</div>
+  </div>
+
+  <!-- Uranus -->
+  <div class="planet uranus" style="animation-duration: 60s;">
+    <div class="label">Uranus</div>
+  </div>
+
+  <!-- Neptune -->
+  <div class="planet neptune" style="animation-duration: 70s;">
+    <div class="label">Neptune</div>
+  </div>
+</div>
+</body>
+</html>

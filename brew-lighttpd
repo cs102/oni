@@ -1,0 +1,22 @@
+==> Fetching downloads for: lighttpd
+✔︎ API Source lighttpd.rb                                                     Verified      3.9KB/  3.9KB
+✔︎ Formula lighttpd (1.4.82)                                                  Verified    883.4KB/883.4KB
+==> ./autogen.sh
+==> ./configure --disable-silent-rules --sbindir=/usr/local/Cellar/lighttpd/1.4.82/bin --with-bzip2 --wi
+==> make install
+==> Caveats
+Docroot is: /usr/local/var/www
+
+The default port has been set in /usr/local/etc/lighttpd/lighttpd.conf to 8080 so that
+lighttpd can run without sudo.
+
+To start lighttpd now and restart at login:
+  brew services start lighttpd
+Or, if you don't want/need a background service you can just run:
+  /usr/local/opt/lighttpd/bin/lighttpd -D -f /usr/local/etc/lighttpd/lighttpd.conf
+==> Summary
+🍺  /usr/local/Cellar/lighttpd/1.4.82: 35 files, 1.8MB, built in 1 minute 40 seconds
+==> Running `brew cleanup lighttpd`...
+Disable this behaviour by setting `HOMEBREW_NO_INSTALL_CLEANUP=1`.
+Hide these hints with `HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).
+

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>English Prefix Network</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f9;
+    margin: 0;
+  }
+  h1 {
+    text-align: center;
+    margin: 10px;
+  }
+  #controls {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  button {
+    margin: 5px;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  svg {
+    width: 100vw;
+    height: 85vh;
+  }
+  .tooltip {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 6px;
+    font-size: 12px;
+    pointer-events: none;
+  }
+  .hidden {
+    opacity: 0.1;
+  }
+</style>
+</head>
+<body>
+
+<h1>English Prefix Force-Directed Network</h1>
+
+<div id="controls">
+  <button onclick="expandAll()">Expand All</button>
+  <button onclick="collapseCategories()">Collapse Categories</button>
+  <button onclick="exportSVG()">Export SVG</button>
+  <button onclick="exportPNG()">Export PNG</button>
+</div>
+
+<svg></svg>
+<div class="tooltip" style="display:none;"></div>
+
+<script>
+/* =========================
+   DATA
+   ========================= */
+const prefixData = {
+  negative: [
+    { prefix: "un-", definition: "not, opposite of", examples: ["unhappy","undo","unfair","untidy","unlucky"] },
+    { prefix: "in-", definition: "not, opposite of", examples: ["incomplete","inactive","incorrect","invisible","insensitive"] },
+    { prefix: "dis-", definition: "not, opposite of, reverse", examples: ["disagree","disconnect","dislike","disapprove","disappear"] }
+  ],
+  time_related: [
+    { prefix: "pre-", definition: "before", examples: ["prehistory","prepare","preview","predict","preemptive"] },
+    { prefix: "post-", definition: "after", examples: ["postpone","postwar","postscript","postgraduate","posthumous"] },
+    { prefix: "re-", definition: "again, back", examples: ["return","rebuild","redo","revisit","rethink"] }
+  ],
+  size_quantity: [
+    { prefix: "hyper-", definition: "excessive", examples: ["hyperactive","hypertension","hyperbole","hyperlink","hyperventilate"] },
+    { prefix: "micro-", definition: "small", examples: ["microphone","microscope","microsecond","microbe","micromanager"] },
+    { prefix: "multi-", definition: "many", examples: ["multitask","multicultural","multiply","multipurpose","multinational"] }
+  ],
+  degree_manner: [
+    { prefix: "sub-", definition: "under", examples: ["submarine","subterranean","substandard","submerge","subtle"] },
+    { prefix: "super-", definition: "above", examples: ["superstar","superpower","superficial","superhuman","superb"] },
+    { prefix: "over-", definition: "too much", examples: ["overwork","overeat","overlook","overwhelm","overconfidence"] }
+  ],
+  place_location: [
+    { prefix: "inter-", definition: "between", examples: ["international","interact","intermediate","intercept","intervene"] },
+    { prefix: "trans-", definition: "across", examples: ["transport","transmit","translate","transformation","transcontinental"] },
+    { prefix: "epi-", definition: "upon", examples: ["epicenter","epidermis","epilogue","epiphany","epic"] }
+  ]
+};
+
+/* =========================
+   BUILD GRAPH
+   ========================= */
+let nodes = [], links = [];
+let collapsedCategories = new Set();
+
+function rebuildGraph() {
+  nodes = [];
+  links = [];
+
+  for (const cat in prefixData) {
+    nodes.push({ id: cat, type: "category" });
+
+    if (collapsedCategories.has(cat)) continue;
+
+    prefixData[cat].forEach(p => {
+      nodes.push({ id: p.prefix, type: "prefix", definition: p.definition });
+      links.push({ source: cat, target: p.prefix });
+
+      p.examples.forEach(ex => {
+        nodes.push({ id: ex, type: "example", parent: p.prefix });
+        links.push({ source: p.prefix, target: ex });
+      });
+    });
+  }
+
+  render();
+}
+
+/* =========================
+   D3 SETUP
+   ========================= */
+const svg = d3.select("svg");
+const width = window.innerWidth;
+const height = window.innerHeight;
+const tooltip = d3.select(".tooltip");
+
+const color = d3.scaleOrdinal()
+  .domain(["category","prefix","example"])
+  .range(["#4e73df","#1cc88a","#f6c23e"]);
+
+let simulation;
+
+function render() {
+  svg.selectAll("*").remove();
+
+  simulation = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(links).id(d => d.id).distance(70))
+    .force("charge", d3.forceManyBody().strength(-220))
+    .force("center", d3.forceCenter(width / 2, height / 2));
+
+  const link = svg.append("g")
+    .attr("stroke", "#aaa")
+    .selectAll("line")
+    .data(links)
+    .enter().append("line");
+
+  const node = svg.append("g")
+    .selectAll("g")
+    .data(nodes)
+    .enter().append("g")
+    .call(d3.drag()
+      .on("start", dragstarted)
+      .on("drag", dragged)
+      .on("end", dragended)
+    );
+
+  node.append("circle")
+    .attr("r", d => d.type === "category" ? 14 : d.type === "prefix" ? 10 : 6)
+    .attr("fill", d => color(d.type))
+    .on("mouseover", (e,d) => {
+      tooltip.style("display","block")
+        .html(d.definition || d.id);
+    })
+    .on("mousemove", e => {
+      tooltip.style("left", e.pageX + 10 + "px")
+             .style("top", e.pageY + 10 + "px");
+    })
+    .on("mouseout", () => tooltip.style("display","none"))
+    .on("click", (_, d) => highlightPrefix(d));
+
+  node.append("text")
+    .attr("x", 10)
+    .attr("y", 4)
+    .text(d => d.id);
+
+  simulation.on("tick", () => {
+    link
+      .attr("x1", d => d.source.x)
+      .attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x)
+      .attr("y2", d => d.target.y);
+
+    node.attr("transform", d => `translate(${d.x},${d.y})`);
+  });
+}
+
+/* =========================
+   INTERACTIONS
+   ========================= */
+function highlightPrefix(d) {
+  if (d.type !== "prefix") return;
+
+  svg.selectAll("circle")
+    .classed("hidden", n =>
+      n.type === "example" && n.parent !== d.id
+    );
+}
+
+function collapseCategories() {
+  Object.keys(prefixData).forEach(c => collapsedCategories.add(c));
+  rebuildGraph();
+}
+
+function expandAll() {
+  collapsedCategories.clear();
+  rebuildGraph();
+}
+
+/* =========================
+   EXPORT
+   ========================= */
+function exportSVG() {
+  const serializer = new XMLSerializer();
+  const svgStr = serializer.serializeToString(svg.node());
+  download(svgStr, "prefix-network.svg", "image/svg+xml");
+}
+
+function exportPNG() {
+  const serializer = new XMLSerializer();
+  const svgStr = serializer.serializeToString(svg.node());
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  const img = new Image();
+
+  canvas.width = width;
+  canvas.height = height;
+
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0);
+    download(canvas.toDataURL("image/png"), "prefix-network.png");
+  };
+
+  img.src = "data:image/svg+xml;base64," + btoa(svgStr);
+}
+
+function download(data, name, type) {
+  const a = document.createElement("a");
+  a.href = data;
+  a.download = name;
+  a.click();
+}
+
+/* =========================
+   DRAG
+   ========================= */
+function dragstarted(e,d){ if(!e.active) simulation.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y;}
+function dragged(e,d){ d.fx=e.x; d.fy=e.y;}
+function dragended(e,d){ if(!e.active) simulation.alphaTarget(0); d.fx=null; d.fy=null;}
+
+/* INIT */
+rebuildGraph();
+</script>
+
+</body>
+</html>
+

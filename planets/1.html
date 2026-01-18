@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Solar System</title>
+<style>
+  body {
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+
+  .solar-system {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-top: 50px;
+  }
+
+  .planet {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: gray;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  /* Specific colors for planets */
+  .mercury { background-color: #a9a9a9; width: 20px; height: 20px; }
+  .venus { background-color: #c67171; width: 25px; height: 25px; }
+  .earth { background-color: #1e90ff; width: 30px; height: 30px; }
+  .mars { background-color: #ff4500; width: 22px; height: 22px; }
+  .jupiter { background-color: #daa520; width: 50px; height: 50px; }
+  .saturn { background-color: #deb887; width: 45px; height: 45px; }
+  .uranus { background-color: #87cefa; width: 35px; height: 35px; }
+  .neptune { background-color: #4169e1; width: 35px; height: 35px; }
+
+  /* Moons */
+  .moon {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #d3d3d3;
+    border-radius: 50%;
+  }
+
+  /* Position moons around planets */
+  .moon1 { top: -10px; left: 20px; }
+  .moon2 { top: -8px; left: -8px; }
+  .moon3 { top: -12px; left: 12px; }
+
+  /* Planet labels */
+  .label {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 14px;
+  }
+
+  /* Optional hover effect */
+  .planet:hover {
+    transform: scale(1.2);
+#container{border: 1px solid red;}
+.item{border: 1px solid red;}
+  }
+</style>
+<script src ="1.js"></script>
+</head>
+<body>
+<h1>Solar System</h1>
+<div id="container" class="container">
+</div>
+<div class="item"></div>
+<ul id="list">
+  
+</li>
+
+</ul>
+<div class="solar-system">
+  <!-- Mercury -->
+  <div class="planet mercury">
+    <div class="moon moon1"></div>
+    <div class="label">Mercury</div>
+  </div>
+  <!-- Venus -->
+  <div class="planet venus">
+    <div class="label">Venus</div>
+  </div>
+  <!-- Earth -->
+  <div class="planet earth">
+    <div class="moon moon1"></div>
+    <div class="label">Earth</div>
+  </div>
+  <!-- Mars -->
+  <div class="planet mars">
+    <div class="moon moon1"></div>
+    <div class="label">Mars</div>
+  </div>
+  <!-- Jupiter -->
+  <div class="planet jupiter">
+    <div class="moon moon1"></div>
+    <div class="moon moon2"></div>
+    <div class="label">Jupiter</div>
+  </div>
+  <!-- Saturn -->
+  <div class="planet saturn">
+    <div class="moon moon1"></div>
+    <div class="label">Saturn</div>
+  </div>
+  <!-- Uranus -->
+  <div class="planet uranus">
+    <div class="moon moon1"></div>
+    <div class="label">Uranus</div>
+  </div>
+  <!-- Neptune -->
+  <div class="planet neptune">
+    <div class="moon moon1"></div>
+    <div class="label">Neptune</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Elliptical Solar System with Moons</title>
+<style>
+  body {
+    background-color: #000;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  /* Container for solar system */
+  .solar-system {
+    position: relative;
+    width: 1000px;
+    height: 1000px;
+  }
+
+  /* Sun at the center */
+  .sun {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    background: yellow;
+    border-radius: 50%;
+    box-shadow: 0 0 20px 5px yellow;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  }
+
+  /* Elliptical orbits for planets; use transform: rotate + scale to create ellipses */
+  .orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border: 1px dashed rgba(255,255,255,0.2);
+    transform-origin: center;
+  }
+  /* Specific orbit sizes and rotations for ellipticity */
+  .orbit1 {
+    width: 200px;
+    height: 100px;
+    margin: -50px 0 0 -100px;
+    transform: rotate(0deg) scale(1, 1);
+  }
+  .orbit2 {
+    width: 300px;
+    height: 150px;
+    margin: -75px 0 0 -150px;
+    transform: rotate(15deg) scale(1, 1);
+  }
+  .orbit3 {
+    width: 400px;
+    height: 200px;
+    margin: -100px 0 0 -200px;
+    transform: rotate(-10deg) scale(1, 1);
+  }
+  .orbit4 {
+    width: 500px;
+    height: 250px;
+    margin: -125px 0 0 -125px;
+    transform: rotate(25deg) scale(1, 1);
+  }
+  /* Add more orbits as desired */
+
+  /* Planets styles (positions along orbits) */
+  .planet {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 10px;
+    color: #fff;
+  }
+
+  /* Specific planet positions, calculated along elliptical atoms */
+  /* Mercury */
+  .mercury {
+    width: 12px;
+    height: 12px;
+    background-color: #a9a9a9;
+    border-radius: 50%;
+    /* position along the orbit path by transforming translate and rotate */
+    /* Using inline style for clarity */
+  }
+
+  /* Venus */
+  .venus {
+    width: 16px;
+    height: 16px;
+    background-color: #c67171;
+    border-radius: 50%;
+  }
+
+  /* Earth, with moon */
+  .earth {
+    width: 20px;
+    height: 20px;
+    background-color: #1e90ff;
+    border-radius: 50%;
+    position: relative; /* For moon orbiting */
+  }
+
+  /* Mars */
+  .mars {
+    width: 16px;
+    height: 16px;
+    background-color: #ff4500;
+    border-radius: 50%;
+  }
+
+  /* Jupiter */
+  .jupiter {
+    width: 30px;
+    height: 30px;
+    background-color: #daa520;
+    border-radius: 50%;
+  }
+
+  /* Saturn */
+  .saturn {
+    width: 26px;
+    height: 26px;
+    background-color: #deb887;
+    border-radius: 50%;
+  }
+
+  /* Uranus */
+  .uranus {
+    width: 22px;
+    height: 22px;
+    background-color: #87cefa;
+    border-radius: 50%;
+  }
+
+  /* Neptune */
+  .neptune {
+    width: 22px;
+    height: 22px;
+    background-color: #4169e1;
+    border-radius: 50%;
+  }
+
+  /* Moon orbit around Earth */
+  .moon-orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px; /* radius of Moon orbit */
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 1px dashed rgba(255,255,255,0.2);
+    border-radius: 50%;
+    transform: rotate(45deg) scale(1, 1);
+  }
+
+  .moon {
+    width: 6px;
+    height: 6px;
+    background-color: #ccc;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 0; /* Positioned at right edge of moon orbit */
+    margin-top: -3px;
+  }
+
+</style>
+</head>
+<body>
+<div class="solar-system">
+  <!-- Sun -->
+  <div class="sun"></div>
+
+  <!-- Orbits for planets -->
+  <div class="orbit orbit1"></div>
+  <div class="orbit orbit2"></div>
+  <div class="orbit orbit3"></div>
+  <div class="orbit orbit4"></div>
+
+  <!-- Planets positioned along elliptic orbits -->
+  
+  <!-- Mercury -->
+  <div class="planet mercury" style="
+    transform: translate(100px, 0) rotate(0deg);
+    "> 
+    <div>Mercury</div>
+  </div>
+  
+  <!-- Venus -->
+  <div class="planet venus" style="
+    transform: translate(150px, -75px) rotate(15deg);
+    "> 
+    <div>Venus</div>
+  </div>
+  
+  <!-- Earth with Moon -->
+  <div class="planet earth" style="
+    transform: translate(200px, 100px) rotate(30deg);
+    ">
+    <div>Earth</div>
+    <!-- Moon's orbit -->
+    <div class="moon-orbit" style="
+      top: 0; left: 0;
+      transform: rotate(60deg);">
+      <div class="moon" style="transform: translateX(20px);"></div>
+    </div>
+  </div>
+  
+  <!-- Mars -->
+  <div class="planet mars" style="
+    transform: translate(230px, -120px) rotate(-20deg);
+    ">
+    <div>Mars</div>
+  </div>
+
+  <!-- Jupiter -->
+  <div class="planet jupiter" style="
+    transform: translate(280px, 150px) rotate(10deg);
+    ">
+    <div>Jupiter</div>
+  </div>
+
+  <!-- Saturn -->
+  <div class="planet saturn" style="
+    transform: translate(330px, -180px) rotate(30deg);
+    ">
+    <div>Saturn</div>
+  </div>
+
+  <!-- Uranus -->
+  <div class="planet uranus" style="
+    transform: translate(380px, 200px) rotate(-15deg);
+    ">
+    <div>Uranus</div>
+  </div>
+
+  <!-- Neptune -->
+  <div class="planet neptune" style="
+    transform: translate(420px, -220px) rotate(25deg);
+    ">
+    <div>Neptune</div>
+  </div>
+
+</div>
+</body>
+</html>

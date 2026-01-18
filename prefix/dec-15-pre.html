@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prefix Categories Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" src="prefixes.json"></script>
+		<style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        canvas {
+            border: 2px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 80%; max-width: 800px;">
+        <h1 style="text-align: center;">Prefix Categories Graph</h1>
+        <canvas id="prefixChart"></canvas>
+    </div>
+
+    <script>
+        // Prefix data from the JSON structure
+				//fetch("prefixes.json")
+        //data = FileAttachment("prefixes.json").json();
+        const links = data.links.map(d => ({...d}));
+				//import jsonData from './prefixes.json' assert { type: 'json' };
+        const prefixData = {
+            "negative": 3,
+            "time_related": 3,
+            "size_quantity": 3,
+            "degree_manner": 3,
+            "place_location": 3
+        };
+
+        // Prepare data for the chart
+        const categories = Object.keys(prefixData);
+        const counts = Object.values(prefixData);
+
+        // Create the chart
+        const ctx = document.getElementById('prefixChart').getContext('2d');
+        const prefixChart = new Chart(ctx, {
+            type: 'bar', // Change to 'pie' for pie chart
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: 'Number of Prefixes',
+                    data: counts,
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                    hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#f4b619', '#e15f48'],
+                    borderColor: ['#e5e5e5', '#e5e5e5', '#e5e5e5', '#e5e5e5', '#e5e5e5'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
