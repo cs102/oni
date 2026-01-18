@@ -1,0 +1,16 @@
+<p style="color: green"><%= notice %></p>
+
+<% content_for :title, "Words" %>
+
+<h1>Words</h1>
+<%= link_to "New word", new_word_path %>
+
+<div id="words">
+  <% @words.each do |word| %>
+    <%= render word %>
+    
+      <%= link_to "Show this word", word %>
+    
+  <% end %>
+</div>
+

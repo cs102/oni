@@ -1,0 +1,54 @@
+<%= form_with(model: word) do |form| %>
+  <% if word.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(word.errors.count, "error") %> prohibited this word from being saved:</h2>
+
+      <ul>
+        <% word.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  
+
+  <div>
+    <%= form.label :grade, style: "display: block" %>
+    <%= form.text_field :grade %>
+  </div>
+
+  <div>
+    <%= form.label :prefix, style: "display: block" %>
+    <%= form.text_field :prefix %>
+  </div>
+
+  <div>
+    <%= form.label :suffix, style: "display: block" %>
+    <%= form.text_field :suffix %>
+  </div>
+
+  <div>
+    <%= form.label :definition, style: "display: block" %>
+    <%= form.text_field :definition %>
+  </div>
+
+  <div>
+    <%= form.label :example, style: "display: block" %>
+    <%= form.text_field :example %>
+  </div>
+
+  <div>
+    <%= form.label :origin, style: "display: block" %>
+    <%= form.text_field :origin %>
+  </div>
+
+  <div>
+    <%= form.label :note, style: "display: block" %>
+    <%= form.text_field :note %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>
