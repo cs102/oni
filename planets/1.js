@@ -10,11 +10,12 @@ fetch(url)
       console.log(dataArray)
       
       list.innerHTML = dataArray
-      .map(({id, name, email, address}) => {
+      .map(({ id, name, email, address, company }) => {
         return `<li class="list-item" "data-uid="${id}">
         <p>${name}</p>
         <p>${email}</p>
-        <p>${address}</p>
+        <p>${address.city}</p>
+		<p>${company.catchPhrase}</p>
         </li>`;
       })
     .join('');
