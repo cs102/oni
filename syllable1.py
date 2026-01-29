@@ -1,4 +1,4 @@
-print ("writing this up ONLY because the cmudict API turned out to be also VERY STUPID to use")
+#print ("writing this up ONLY because the cmudict API turned out to be also VERY STUPID to use")
 
 #import nltk.corpus.cmudict  # this does not work!?!?
 from nltk.corpus import cmudict
@@ -38,7 +38,7 @@ def syllables_in_text(text):
 if __name__ == "__main__":
     test_text = "'the cow jumped, over the moon'"
     print (test_text, "syllables:", syllables_in_text(test_text))
-    #syllables_in_text(test_text)
+    syllables_in_text(test_text)
     
     import timeit
     print ("time trial:", timeit.Timer('f(test_text)', 'from __main__ import test_text, syllables_in_text as f').timeit(100000))
