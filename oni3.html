@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Oniword - Word Maker</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#f0f8ff;
+padding:20px;
+}
+
+h1{
+color:#2c3e50;
+}
+
+#pieces{
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+gap:12px;
+margin:30px;
+}
+
+.piece{
+background:#ffcc66;
+padding:14px 24px;
+border-radius:12px;
+font-size:3rem;
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Oniword - Word Maker</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#f0f8ff;
+padding:20px;
+}
+
+h1{
+color:#2c3e50;
+}
+
+#pieces{
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+gap:12px;
+margin:30px;
+}
+
+.piece{
+background:#ffcc66;
+padding:14px 24px;
+border-radius:12px;
+font-size:2rem;
+font-family: ui-rounded;
+cursor:grab;
+user-select:none;
+}
+
+.slots{
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+gap:15px;
+margin:30px;
+}
+
+.slot{
+width:150px;
+height:60px;
+border:3px dashed #555;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:white;
+}
+
+.slot.hover{
+background:#dff6ff;
+border-color:#0077cc;
+}
+
+button{
+padding:12px 20px;
+font-size:18px;
+margin:10px;
+border:none;
+border-radius:8px;
+background:#4CAF50;
+color:white;
+cursor:pointer;
+}
+
+#message{
+font-size:22px;
+margin-top:20px;
+min-height:30px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Word Builder</h1>
+<p>Drag the parts to build the word</p>
+
+<div id="pieces"></div>
+
+<div class="slots" id="slots"></div>
+
+<button onclick="checkAnswer()">Check</button> <button onclick="nextWord()">Next Word</button>
+
+<div id="message"></div>
+
+<script>
+
+// WORD LIST
+const words=[
+"constructable",
+"constructed",
+"constructing",
+"construction",
+"constructive",
+"constructs",
+"deconstructability",
+"deconstructable",
+"deconstructed",
+"deconstruction",
+"destructed",
+"destructing",
+"destruction",
+"destructive",
+"indestructable",
+"infrastructure",
+"instruction",
+"instructive",
+"obstruction",
+"reconstructable",
+"reconstruction",
+"restructure",
+"structure",
+"unconstructable",
+"unconstructed",
+"unstructure"
+];
+
+// MORPHEME RULES
+
+const prefixes=["de","re","un","in","ob","con", "fra"];
+const suffixes=["ion","ing","ed","ive","able","ability","s","ure"];
+
+let currentWord="";
+let morphemes=[];
+let dragged=null;
+
+// shuffle
+function shuffle(arr){
+return arr.sort(()=>Math.random()-0.5);
+}
+
+// split word into morphemes
+function analyzeWord(word){
+
+let pieces=[];
+let remaining=word;
+
+prefixes.forEach(p=>{
+if(remaining.startsWith(p)){
+pieces.push(p);
+remaining=remaining.slice(p.length);
+}
+});
+
+suffixes.forEach(s=>{
+if(remaining.endsWith(s)){
+remaining=remaining.slice(0,-s.length);
+pieces.push(remaining);
+pieces.push(s);
+remaining="";
+}
+});
+
+if(remaining.length>0){
+pieces.push(remaining);
+}
+
+return pieces;
+}
+
+function loadWord(){
+
+document.getElementById("message").textContent="";
+
+currentWord=words[Math.floor(Math.random()*words.length)];
+
+morphemes=analyzeWord(currentWord);
+
+const pieceArea=document.getElementById("pieces");
+const slotArea=document.getElementById("slots");
+
+pieceArea.innerHTML="";
+slotArea.innerHTML="";
+
+// create slots
+morphemes.forEach(()=>{
+
+let slot=document.createElement("div");
+slot.className="slot";
+
+slot.addEventListener("dragover",e=>{
+e.preventDefault();
+slot.classList.add("hover");
+});
+
+slot.addEventListener("dragleave",()=>{
+slot.classList.remove("hover");
+});
+
+slot.addEventListener("drop",e=>{
+e.preventDefault();
+slot.classList.remove("hover");
+
+if(slot.querySelector(".piece")) return;
+
+slot.appendChild(dragged);
+});
+
+slotArea.appendChild(slot);
+
+});
+
+// create pieces
+shuffle([...morphemes]).forEach(p=>{
+
+let div=document.createElement("div");
+div.className="piece";
+div.textContent=p;
+div.draggable=true;
+
+div.addEventListener("dragstart",()=>{
+dragged=div;
+});
+
+pieceArea.appendChild(div);
+
+});
+
+}
+
+function checkAnswer(){
+
+let built="";
+
+document.querySelectorAll(".slot").forEach(slot=>{
+
+let piece=slot.querySelector(".piece");
+
+if(piece){
+built+=piece.textContent;
+}
+
+});
+
+if(built===currentWord){
+
+document.getElementById("message").textContent="😀 Correct! "+currentWord;
+
+}else{
+
+document.getElementById("message").textContent="❌ Try again";
+
+}
+
+}
+
+function nextWord(){
+loadWord();
+}
+
+loadWord();
+
+</script>
+
+</body>
+</html>
+
+font-family: ui-rounded;
+cursor:grab;
+user-select:none;
+}
+
+.slots{
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+gap:15px;
+margin:30px;
+}
+
+.slot{
+width:150px;
+height:60px;
+border:3px dashed #555;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:white;
+}
+
+.slot.hover{
+background:#dff6ff;
+border-color:#0077cc;
+}
+
+button{
+padding:12px 20px;
+font-size:18px;
+margin:10px;
+border:none;
+border-radius:8px;
+background:#4CAF50;
+color:white;
+cursor:pointer;
+}
+
+#message{
+font-size:22px;
+margin-top:20px;
+min-height:30px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Word Builder</h1>
+<p>Drag the parts to build the word</p>
+
+<div id="pieces"></div>
+
+<div class="slots" id="slots"></div>
+
+<button onclick="checkAnswer()">Check</button> <button onclick="nextWord()">Next Word</button>
+
+<div id="message"></div>
+
+<script>
+
+// WORD LIST
+const words=[
+"constructable",
+"constructed",
+"constructing",
+"construction",
+"constructive",
+"constructs",
+"deconstructability",
+"deconstructable",
+"deconstructed",
+"deconstruction",
+"destructed",
+"destructing",
+"destruction",
+"destructive",
+"indestructable",
+"infrastructure",
+"instruction",
+"instructive",
+"obstruction",
+"reconstructable",
+"reconstruction",
+"restructure",
+"structure",
+"unconstructable",
+"unconstructed",
+"unstructure"
+];
+
+// MORPHEME RULES
+
+const prefixes=["de","re","un","in","ob","con", "fra"];
+const suffixes=["ion","ing","ed","ive","able","ability","s","ure"];
+
+let currentWord="";
+let morphemes=[];
+let dragged=null;
+
+// shuffle
+function shuffle(arr){
+return arr.sort(()=>Math.random()-0.5);
+}
+
+// split word into morphemes
+function analyzeWord(word){
+
+let pieces=[];
+let remaining=word;
+
+prefixes.forEach(p=>{
+if(remaining.startsWith(p)){
+pieces.push(p);
+remaining=remaining.slice(p.length);
+}
+});
+
+suffixes.forEach(s=>{
+if(remaining.endsWith(s)){
+remaining=remaining.slice(0,-s.length);
+pieces.push(remaining);
+pieces.push(s);
+remaining="";
+}
+});
+
+if(remaining.length>0){
+pieces.push(remaining);
+}
+
+return pieces;
+}
+
+function loadWord(){
+
+document.getElementById("message").textContent="";
+
+currentWord=words[Math.floor(Math.random()*words.length)];
+
+morphemes=analyzeWord(currentWord);
+
+const pieceArea=document.getElementById("pieces");
+const slotArea=document.getElementById("slots");
+
+pieceArea.innerHTML="";
+slotArea.innerHTML="";
+
+// create slots
+morphemes.forEach(()=>{
+
+let slot=document.createElement("div");
+slot.className="slot";
+
+slot.addEventListener("dragover",e=>{
+e.preventDefault();
+slot.classList.add("hover");
+});
+
+slot.addEventListener("dragleave",()=>{
+slot.classList.remove("hover");
+});
+
+slot.addEventListener("drop",e=>{
+e.preventDefault();
+slot.classList.remove("hover");
+
+if(slot.querySelector(".piece")) return;
+
+slot.appendChild(dragged);
+});
+
+slotArea.appendChild(slot);
+
+});
+
+// create pieces
+shuffle([...morphemes]).forEach(p=>{
+
+let div=document.createElement("div");
+div.className="piece";
+div.textContent=p;
+div.draggable=true;
+
+div.addEventListener("dragstart",()=>{
+dragged=div;
+});
+
+pieceArea.appendChild(div);
+
+});
+
+}
+
+function checkAnswer(){
+
+let built="";
+
+document.querySelectorAll(".slot").forEach(slot=>{
+
+let piece=slot.querySelector(".piece");
+
+if(piece){
+built+=piece.textContent;
+}
+
+});
+
+if(built===currentWord){
+
+document.getElementById("message").textContent="😀 Correct! "+currentWord;
+
+}else{
+
+document.getElementById("message").textContent="❌ Try again";
+
+}
+
+}
+
+function nextWord(){
+loadWord();
+}
+
+loadWord();
+
+</script>
+
+</body>
+</html>
